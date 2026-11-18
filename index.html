@@ -113,13 +113,13 @@
   }
   select{width:100%; padding:12px 14px; border-radius:12px; border:1.5px solid var(--line); font-size:15px; font-family:inherit; background:#FFFCFD; color:var(--ink); outline:none;}
   select:focus{border-color: var(--sakura);}
-  body.app-mode{background: radial-gradient(120% 70% at 50% -10%, #3B1D6B 0%, transparent 60%), #0E0A1A; padding:0;}
-  .shell{width:100%; max-width:430px; height:100dvh; display:flex; flex-direction:column; background:#140E26; color:#F4EEFF; overflow:hidden; position:relative; padding-top:env(safe-area-inset-top,0px);}
+  body.app-mode{background-image: radial-gradient(120% 70% at 50% -10%, #3B1D6B 0%, transparent 60%) !important; background-color:#0E0A1A !important; background-attachment:scroll !important; padding:0;}
+  .shell{width:100%; max-width:520px; height:100dvh; display:flex; flex-direction:column; background:#140E26; color:#F4EEFF; overflow:hidden; position:relative; padding-top:env(safe-area-inset-top,0px);}
   @media (min-width:480px){ body.app-mode{padding:24px 16px;} .shell{border-radius:28px; height:min(100dvh - 48px, 860px); border:1px solid #2E2250;} }
   .top{display:flex; align-items:center; justify-content:center; gap:8px; padding:16px 18px 8px; font-family:'Quicksand',sans-serif; font-weight:700; font-size:18px;}
   .main{flex:1; overflow-y:auto; padding:8px 18px 16px; flex-direction:column;}
   .nav{display:flex; border-top:1px solid #2E2250; background:#110B20; padding:8px 4px calc(8px + env(safe-area-inset-bottom,0px));}
-  .nav button{flex:1; background:none; border:none; color:#9A8DBA; font-family:inherit; font-size:11.5px; display:flex; flex-direction:column; align-items:center; gap:3px; cursor:pointer; padding:4px 0;}
+  .nav button{flex:1; min-width:0; white-space:nowrap; background:none; border:none; color:#9A8DBA; font-family:inherit; font-size:11px; display:flex; flex-direction:column; align-items:center; gap:3px; cursor:pointer; padding:4px 0;}
   .nav button span{font-size:20px; filter:grayscale(1) opacity(.7);}
   .nav button.on{color:#B07CFF; font-weight:600;}
   .nav button.on span{filter:none;}
@@ -184,7 +184,7 @@ const BLOSSOM_SVG = '<svg width="28" height="28" viewBox="0 0 240 240" xmlns="ht
   + '</g><circle cx="120" cy="120" r="28" fill="#C94F76"/></svg>';
 
 function Logo(){
-  return h('div',{className:'mark'}, h('span',{className:'bud', dangerouslySetInnerHTML:{__html:BLOSSOM_SVG}}), h('span',null,'Sakura'), h('span',{style:{marginLeft:'auto',fontSize:10,opacity:.5}},'v3'));
+  return h('div',{className:'mark'}, h('span',{className:'bud', dangerouslySetInnerHTML:{__html:BLOSSOM_SVG}}), h('span',null,'Sakura'), h('span',{style:{marginLeft:'auto',fontSize:10,opacity:.5}},'v4'));
 }
 function Message({type,children}){
   if(!children) return null;
@@ -532,7 +532,7 @@ function MainApp({data, go}){
   const tabs=[['swipe','🔥','Swiping'],['notif','🔔','Notifications'],['chat','💬','Chat'],['you','👤','You']];
   const pane=(id,child)=>h('div',{className:'main',style:{display: tab===id?'flex':'none'}}, child);
   return h('div',{className:'shell'},
-    h('div',{className:'top'},'💜 Myth Connect'),
+    h('div',{className:'top'},'🌸 Sakura'),
     pane('swipe', h(SwipeTab,{me:data.user})),
     pane('notif', h(Empty,{title:'No notifications yet',text:'Likes, new matches and suggestions will show up here.'})),
     pane('chat', h(Empty,{title:'No chats yet',text:'When you and someone like each other, you can chat here.'})),
