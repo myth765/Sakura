@@ -157,7 +157,7 @@ function Message({type,children}){
   return h('div',{className:'msg '+type}, children);
 }
 
-function LoginView({go, prefillEmail}){
+function LoginView({go, route, prefillEmail}){
   const [email,setEmail]=useState(prefillEmail||'');
   const [pw,setPw]=useState('');
   const [show,setShow]=useState(false);
@@ -178,7 +178,7 @@ function LoginView({go, prefillEmail}){
       setErr(error.message);
       return;
     }
-    go('home', {email: data.user.email});
+    route(data.user);
   }
 
   return h('div',{className:'card'},
@@ -299,7 +299,7 @@ function ForgotView({data, go}){
   );
 }
 
-function ResetPasswordView({go}){
+function ResetPasswordView({go, route}){
   const [pw,setPw]=useState(''); const [pw2,setPw2]=useState('');
   const [err,setErr]=useState(''); const [loading,setLoading]=useState(false);
 
@@ -311,7 +311,7 @@ function ResetPasswordView({go}){
     const { data, error } = await sb.auth.updateUser({ password: pw });
     setLoading(false);
     if(error){ setErr(error.message); return; }
-    go('home', {email: data.user.email});
+    route(data.user);
   }
 
   return h('div',{className:'card'},
@@ -326,57 +326,62 @@ function ResetPasswordView({go}){
   );
 }
 
-function HomeView({data, go}){
-  const [profile,setProfile]=useState(null);
-  const [name,setName]=useState(''); const [birthday,setBirthday]=useState('');
-  const [gender,setGender]=useState(''); const [orientation,setOrientation]=useState('');
-  const [bio,setBio]=useState('');
-  const [loading,setLoading]=useState(true);
-  const [saving,setSaving]=useState(false);
-  const [msg,setMsg]=useState('');
+function isComplete(p){ return !!(p && p.display_name && p.birthday); }
+function ageFrom(b){
+  if(!b) return null;
+  const d=new Date(b), t=new Date();
+  let a=t.getFullYear()-d.getFullYear();
+  if(t.getMonth()<d.getMonth() || (t.getMonth()===d.getMonth() && t.getDate()<d.getDate())) a--;
+  return a;
+}
 
-  useEffect(()=>{
-    (async ()=>{
-      const { data:{user} } = await sb.auth.getUser();
-      const { data:row, error } = await sb.from('profiles').select('*').eq('id', user.id).single();
-      if(!error && row){
-        setProfile(row);
-        setName(row.display_name||''); setBirthday(row.birthday||'');
-        setGender(row.gender||''); setOrientation(row.orientation||''); setBio(row.bio||'');
-      }
-      setLoading(false);
-    })();
-  },[]);
+function ProfileForm({user, profile, title, sub, submitLabel, onDone, onCancel}){
+  const p = profile || {};
+  const [name,setName]=useState(p.display_name||''); const [birthday,setBirthday]=useState(p.birthday||'');
+  const [gender,setGender]=useState(p.gender||''); const [orientation,setOrientation]=useState(p.orientation||'');
+  const [bio,setBio]=useState(p.bio||'');
+  const [saving,setSaving]=useState(false); const [err,setErr]=useState('');
 
   async function save(e){
-    e.preventDefault(); setSaving(true); setMsg('');
-    const { data:{user} } = await sb.auth.getUser();
-    const { error } = await sb.from('profiles').update({
-      display_name: name, birthday: birthday || null, gender, orientation, bio, updated_at: new Date().toISOString()
-    }).eq('id', user.id);
+    e.preventDefault(); setErr('');
+    if(!name.trim()){ setErr('Enter a display name.'); return; }
+    if(!birthday){ setErr('Enter your birthday.'); return; }
+    if(ageFrom(birthday) < 18){ setErr('You must be 18 or older to use Sakura.'); return; }
+    setSaving(true);
+    const row = { id:user.id, email:user.email, display_name:name.trim(), birthday, gender, orientation, bio, updated_at:new Date().toISOString() };
+    const { error } = await sb.from('profiles').upsert(row);
     setSaving(false);
-    setMsg(error ? error.message : 'Profile saved.');
+    if(error){ setErr(error.message); return; }
+    onDone(row);
   }
-
-  async function logout(){
-    await sb.auth.signOut();
-    go('login');
-  }
-
-  if(loading) return h('div',{className:'card'}, h(Logo), h('div',{className:'sub'},'Loading your profile…'));
 
   return h('div',{className:'card'},
     h(Logo),
-    h('div',{className:'sub'}, 'Logged in as '+data.email),
-    h(Message,{type: msg && /error|violat/i.test(msg) ? 'err':'ok'}, msg),
+    h('div',{className:'sub'}, sub),
+    h(Message,{type:'err'}, err),
     h('form',{onSubmit:save},
       h('div',{className:'field'}, h('label',null,'Display name'), h('input',{type:'text',value:name,onChange:e=>setName(e.target.value),placeholder:'How others see you'})),
       h('div',{className:'field'}, h('label',null,'Birthday'), h('input',{type:'date',value:birthday,onChange:e=>setBirthday(e.target.value)})),
       h('div',{className:'field'}, h('label',null,'Gender'), h('input',{type:'text',value:gender,onChange:e=>setGender(e.target.value),placeholder:'e.g. Woman, Man, Non-binary'})),
       h('div',{className:'field'}, h('label',null,'Sexual orientation'), h('input',{type:'text',value:orientation,onChange:e=>setOrientation(e.target.value),placeholder:'e.g. Straight, Gay, Bisexual'})),
       h('div',{className:'field'}, h('label',null,'Bio'), h('input',{type:'text',value:bio,onChange:e=>setBio(e.target.value),placeholder:'A little about you'})),
-      h('button',{className:'btn', disabled:saving}, saving?'Saving…':'Save profile')
+      h('button',{className:'btn', disabled:saving}, saving?'Saving…':submitLabel)
     ),
+    onCancel ? h('button',{className:'btn ghost',style:{marginTop:10},onClick:onCancel},'Cancel') : null
+  );
+}
+
+function HomeView({data, go}){
+  const p = data.profile || {};
+  const age = ageFrom(p.birthday);
+  async function logout(){ await sb.auth.signOut(); go('login'); }
+  return h('div',{className:'card home'},
+    h('div',{className:'bud'},'🌸'),
+    h('h2',null,'Welcome, '+(p.display_name||'friend')),
+    h('p',null, [age!==null ? age+' years old' : null, p.gender||null].filter(Boolean).join(' · ') || data.user.email),
+    p.bio ? h('p',{style:{marginTop:-14}}, p.bio) : null,
+    h('button',{className:'btn'},'Start swiping'),
+    h('button',{className:'btn ghost',style:{marginTop:10},onClick:()=>go('editProfile',data)},'Edit profile'),
     h('button',{className:'btn ghost',style:{marginTop:10},onClick:logout},'Log out')
   );
 }
@@ -384,31 +389,39 @@ function HomeView({data, go}){
 function App(){
   const [view,setView]=useState('loading');
   const [data,setData]=useState({});
+  const viewRef = React.useRef('loading');
+
+  function go(next, d){ viewRef.current = next; setData(d||{}); setView(next); }
+
+  async function route(user){
+    const { data:row } = await sb.from('profiles').select('*').eq('id', user.id).maybeSingle();
+    go(isComplete(row) ? 'home' : 'onboarding', { user, profile: row || {} });
+  }
 
   useEffect(()=>{
     sb.auth.getSession().then(({data:{session}})=>{
-      if(session){ setData({email: session.user.email}); setView('home'); }
-      else { setView('login'); }
+      if(viewRef.current==='resetPassword') return;
+      if(session) route(session.user); else go('login');
     });
     const { data: listener } = sb.auth.onAuthStateChange((event, session)=>{
-      if(event === 'PASSWORD_RECOVERY'){ setView('resetPassword'); return; }
-      if(event === 'SIGNED_IN' && session){ setData({email: session.user.email}); setView('home'); }
-      if(event === 'SIGNED_OUT'){ setView('login'); }
+      if(event === 'PASSWORD_RECOVERY'){ go('resetPassword'); return; }
+      if(event === 'SIGNED_OUT'){ go('login'); return; }
+      if(event === 'SIGNED_IN' && session && ['loading','login','signup','checkEmail','forgot'].includes(viewRef.current)){
+        setTimeout(()=>route(session.user), 0);
+      }
     });
     return ()=> listener.subscription.unsubscribe();
   },[]);
-
-  useEffect(()=>{ document.body.classList.toggle('auth-bg', view==='login'); },[view]);
-
-  function go(next, d){ setData(d||{}); setView(next); }
 
   if(view==='loading') return h('div',{className:'card'}, h('div',{className:'spinner-wrap'}, h(Logo)));
   if(view==='signup') return h(SignupView,{go});
   if(view==='checkEmail') return h(CheckEmailView,{data,go});
   if(view==='forgot') return h(ForgotView,{data,go});
-  if(view==='resetPassword') return h(ResetPasswordView,{go});
+  if(view==='resetPassword') return h(ResetPasswordView,{go,route});
+  if(view==='onboarding') return h(ProfileForm,{user:data.user, profile:data.profile, title:'Set up your profile', sub:'Tell us a bit about you to finish creating your account.', submitLabel:'Finish and continue', onDone:(row)=>go('home',{user:data.user, profile:row})});
+  if(view==='editProfile') return h(ProfileForm,{user:data.user, profile:data.profile, sub:'Update your profile details.', submitLabel:'Save changes', onDone:(row)=>go('home',{user:data.user, profile:row}), onCancel:()=>go('home',data)});
   if(view==='home') return h(HomeView,{data,go});
-  return h(LoginView,{go, prefillEmail:data.email});
+  return h(LoginView,{go, route, prefillEmail:data.email});
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(h(App));
