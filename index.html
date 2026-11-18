@@ -139,6 +139,10 @@
   .empty{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; color:#B9ADD9; gap:8px; padding:40px 20px;}
   .empty b{color:#F4EEFF; font-size:18px; font-family:'Quicksand',sans-serif;}
   .you-row{background:#1C1436; border:1px solid #2E2250; border-radius:16px; padding:14px 16px; margin-bottom:10px; font-size:14px; line-height:1.5;}
+  .avatar{width:96px; height:96px; border-radius:50%; background:var(--blush-2) center/cover no-repeat; display:flex; align-items:center; justify-content:center; font-size:34px; color:var(--sakura-deep); margin:0 auto 8px; border:2px solid var(--line);}
+  .photo-row{text-align:center; margin-bottom:18px;}
+  .photo-row input{display:none;}
+  .pcard.has-img .big{display:none;}
   .shell .btn{background:linear-gradient(135deg,#9B5CFF,#6D3BD2); box-shadow:none;}
   .shell .btn.ghost{background:none; border:1.5px solid #3A2C66; color:#C9B3FF;}
   @media (prefers-color-scheme: dark){
@@ -180,7 +184,7 @@ const BLOSSOM_SVG = '<svg width="28" height="28" viewBox="0 0 240 240" xmlns="ht
   + '</g><circle cx="120" cy="120" r="28" fill="#C94F76"/></svg>';
 
 function Logo(){
-  return h('div',{className:'mark'}, h('span',{className:'bud', dangerouslySetInnerHTML:{__html:BLOSSOM_SVG}}), h('span',null,'Sakura'));
+  return h('div',{className:'mark'}, h('span',{className:'bud', dangerouslySetInnerHTML:{__html:BLOSSOM_SVG}}), h('span',null,'Sakura'), h('span',{style:{marginLeft:'auto',fontSize:10,opacity:.5}},'v3'));
 }
 function Message({type,children}){
   if(!children) return null;
@@ -366,13 +370,42 @@ function ageFrom(b){
   return a;
 }
 
+function resizeImage(file, max){
+  return new Promise((resolve,reject)=>{
+    const img=new Image(); const url=URL.createObjectURL(file);
+    img.onload=()=>{
+      const s=Math.min(1, max/Math.max(img.width,img.height));
+      const c=document.createElement('canvas'); c.width=Math.round(img.width*s); c.height=Math.round(img.height*s);
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+      URL.revokeObjectURL(url);
+      c.toBlob(b=>b?resolve(b):reject(new Error('Could not process image')),'image/jpeg',0.85);
+    };
+    img.onerror=()=>reject(new Error('That file is not a readable image.'));
+    img.src=url;
+  });
+}
+
 function ProfileForm({user, profile, title, sub, submitLabel, onDone, onCancel}){
   const p = profile || {};
   const [name,setName]=useState(p.display_name||''); const [birthday,setBirthday]=useState(p.birthday||'');
   const [gender,setGender]=useState(p.gender||''); const [orientation,setOrientation]=useState(p.orientation||'');
   const [bio,setBio]=useState(p.bio||'');
   const [location,setLocation]=useState(p.location||''); const [lookingFor,setLookingFor]=useState(p.looking_for||'');
+  const [avatar,setAvatar]=useState(p.avatar_url||''); const [uploading,setUploading]=useState(false);
   const [saving,setSaving]=useState(false); const [err,setErr]=useState('');
+
+  async function pickPhoto(e){
+    const f=e.target.files && e.target.files[0]; if(!f) return;
+    setErr(''); setUploading(true);
+    try{
+      const blob=await resizeImage(f,800);
+      const path=user.id+'/'+Date.now()+'.jpg';
+      const { error } = await sb.storage.from('avatars').upload(path, blob, {contentType:'image/jpeg'});
+      if(error) throw error;
+      setAvatar(sb.storage.from('avatars').getPublicUrl(path).data.publicUrl);
+    }catch(ex){ setErr(ex.message||'Photo upload failed.'); }
+    setUploading(false);
+  }
 
   async function save(e){
     e.preventDefault(); setErr('');
@@ -382,7 +415,7 @@ function ProfileForm({user, profile, title, sub, submitLabel, onDone, onCancel})
     if(!location.trim()){ setErr('Enter your city or area.'); return; }
     if(!lookingFor){ setErr('Choose what you are looking for.'); return; }
     setSaving(true);
-    const row = { id:user.id, email:user.email, display_name:name.trim(), birthday, gender, orientation, bio, location:location.trim(), looking_for:lookingFor, updated_at:new Date().toISOString() };
+    const row = { id:user.id, email:user.email, display_name:name.trim(), birthday, gender, orientation, bio, location:location.trim(), looking_for:lookingFor, avatar_url:avatar||null, updated_at:new Date().toISOString() };
     const { error } = await sb.from('profiles').upsert(row);
     setSaving(false);
     if(error){ setErr(error.message); return; }
@@ -394,6 +427,10 @@ function ProfileForm({user, profile, title, sub, submitLabel, onDone, onCancel})
     h('div',{className:'sub'}, sub),
     h(Message,{type:'err'}, err),
     h('form',{onSubmit:save},
+      h('div',{className:'photo-row'},
+        h('div',{className:'avatar',style:avatar?{backgroundImage:'url('+avatar+')'}:{}}, avatar?null:'📷'),
+        h('label',{className:'link',style:{cursor:'pointer'}}, uploading?'Uploading…':(avatar?'Change photo':'Add profile photo'), h('input',{type:'file',accept:'image/*',onChange:pickPhoto,disabled:uploading}))
+      ),
       h('div',{className:'field'}, h('label',null,'Display name'), h('input',{type:'text',value:name,onChange:e=>setName(e.target.value),placeholder:'How others see you'})),
       h('div',{className:'field'}, h('label',null,'Birthday'), h('input',{type:'date',value:birthday,onChange:e=>setBirthday(e.target.value)})),
       h('div',{className:'field'}, h('label',null,'Gender'), h('input',{type:'text',value:gender,onChange:e=>setGender(e.target.value),placeholder:'e.g. Woman, Man, Non-binary'})),
@@ -459,8 +496,8 @@ function SwipeTab({me}){
   const x = fly ? fly*480 : dx;
   return h('div',{style:{display:'flex',flexDirection:'column',flex:1}},
     h('div',{className:'deck'},
-      h('div',{className:'pcard', onPointerDown:down, onPointerMove:move, onPointerUp:up, onPointerCancel:up,
-        style:{transform:'translateX('+x+'px) rotate('+(x/18)+'deg)', transition: startX.current===null ? 'transform .22s ease' : 'none'}},
+      h('div',{className:'pcard'+(c.avatar_url?' has-img':''), onPointerDown:down, onPointerMove:move, onPointerUp:up, onPointerCancel:up,
+        style:{backgroundImage: c.avatar_url ? 'url('+c.avatar_url+')' : undefined, backgroundSize:'cover', backgroundPosition:'center', transform:'translateX('+x+'px) rotate('+(x/18)+'deg)', transition: startX.current===null ? 'transform .22s ease' : 'none'}},
         c.sample ? h('div',{className:'sample'},'Sample profile') : null,
         h('div',{className:'big'}, (c.display_name||'?')[0]),
         h('h3',null, c.display_name+(c.age?', '+c.age:'')),
@@ -480,6 +517,7 @@ function YouTab({data, go}){
   const p = data.profile||{}; const age = ageFrom(p.birthday);
   async function logout(){ await sb.auth.signOut(); go('login'); }
   return h('div',null,
+    h('div',{className:'avatar',style:p.avatar_url?{backgroundImage:'url('+p.avatar_url+')'}:{}}, p.avatar_url?null:((p.display_name||'?')[0])),
     h('div',{className:'you-row'}, h('b',null,(p.display_name||'You')+(age!==null?', '+age:'')), h('div',{className:'meta'}, [p.location,p.gender].filter(Boolean).join(' · ')), p.bio ? h('div',{className:'meta'},p.bio) : null),
     h('div',{className:'you-row'}, 'Looking for: '+(p.looking_for||'Not set')),
     h('button',{className:'btn',onClick:()=>go('editProfile',data)},'Edit profile'),
