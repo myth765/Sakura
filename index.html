@@ -211,7 +211,7 @@ const BLOSSOM_SVG = '<svg width="28" height="28" viewBox="0 0 240 240" xmlns="ht
   + '</g><circle cx="120" cy="120" r="28" fill="#C94F76"/></svg>';
 
 function Logo(){
-  return h('div',{className:'mark'}, h('span',{className:'bud', dangerouslySetInnerHTML:{__html:BLOSSOM_SVG}}), h('span',null,'Sakura'), h('span',{style:{marginLeft:'auto',fontSize:10,opacity:.5}},'v5'));
+  return h('div',{className:'mark'}, h('span',{className:'bud', dangerouslySetInnerHTML:{__html:BLOSSOM_SVG}}), h('span',null,'Sakura'), h('span',{style:{marginLeft:'auto',fontSize:10,opacity:.5}},'v6'));
 }
 function Message({type,children}){
   if(!children) return null;
@@ -569,22 +569,22 @@ function SwipeTab({active, act, setSheet}){
 function NotifTab({inbox, act, openChat, setSheet}){
   const [busy,setBusy]=useState('');
   async function go(id,a){ setBusy(id); await act(id,a); setBusy(''); }
-  const fresh=inbox.matches.filter(m=>!m.last_body);
+  const recent=inbox.matches.filter(m=>Date.now()-new Date(m.matched_at).getTime() < 7*864e5);
   const sugg=inbox.sugg.filter(s=>!inbox.likes.some(l=>l.id===s.id));
   const sec=(t)=>h('div',{className:'sec'},t);
+  const none=(t)=>h('div',{className:'meta',style:{padding:'2px 4px 8px'}},t);
   return h('div',null,
-    fresh.length ? sec('New matches') : null,
-    fresh.map(m=>h(PersonRow,{key:m.match_id,p:m,onView:()=>setSheet(m),sub:"It's a match! You are now friends."},
-      h('button',{className:'btn sm',onClick:()=>openChat(m)},'Start chatting'))),
-    inbox.likes.length ? sec('Liked you') : null,
-    inbox.likes.map(p=>h(PersonRow,{key:p.id,p,onView:()=>setSheet(p),sub:'Liked you · '+fmtTime(p.liked_at)},
+    sec('Likes'),
+    inbox.likes.length ? inbox.likes.map(p=>h(PersonRow,{key:p.id,p,onView:()=>setSheet(p),sub:'Liked you · '+fmtTime(p.liked_at)},
       h('button',{className:'btn sm',disabled:busy===p.id,onClick:()=>go(p.id,'like')},'Like back'),
-      h('button',{className:'btn sm ghost',disabled:busy===p.id,onClick:()=>go(p.id,'pass')},'Pass'))),
-    sugg.length ? sec('Suggested for you') : null,
-    sugg.map(p=>h(PersonRow,{key:p.id,p,onView:()=>setSheet(p)},
+      h('button',{className:'btn sm ghost',disabled:busy===p.id,onClick:()=>go(p.id,'pass')},'Pass'))) : none('No new likes yet. When someone likes you, they show up here.'),
+    sec('Recent matches (last 7 days)'),
+    recent.length ? recent.map(m=>h(PersonRow,{key:m.match_id,p:m,onView:()=>setSheet(m),sub:m.last_body?'Last message: '+m.last_body:"It's a match! Say hi."},
+      h('button',{className:'btn sm',onClick:()=>openChat(m)},m.last_body?'Open chat':'Start chatting'))) : none('No matches in the last 7 days.'),
+    sec('Suggestions'),
+    sugg.length ? sugg.map(p=>h(PersonRow,{key:p.id,p,onView:()=>setSheet(p)},
       h('button',{className:'btn sm',disabled:busy===p.id,onClick:()=>go(p.id,'like')},'Like'),
-      h('button',{className:'btn sm ghost',disabled:busy===p.id,onClick:()=>go(p.id,'pass')},'Dismiss'))),
-    (!fresh.length && !inbox.likes.length && !sugg.length) ? h(Empty,{title:'No notifications yet',text:'Likes, new matches and suggestions will show up here.'}) : null
+      h('button',{className:'btn sm ghost',disabled:busy===p.id,onClick:()=>go(p.id,'pass')},'Dismiss'))) : none('No suggestions right now. Check back soon.')
   );
 }
 
@@ -679,7 +679,7 @@ function MainApp({data, go}){
   },[]);
 
   async function act(target, action){
-    const { error } = await sb.from('swipes').insert({swiper_id:me.id,target_id:target,action});
+    const { error } = await sb.from('swipes').upsert({swiper_id:me.id,target_id:target,action,created_at:new Date().toISOString()},{onConflict:'swiper_id,target_id'});
     if(error) return;
     const st = await refresh();
     const m = st.matches.find(x=>x.other_id===target);
@@ -693,6 +693,7 @@ function MainApp({data, go}){
       sb.from('profiles').update({notif_seen_at:new Date(now).toISOString()}).eq('id',me.id);
     }
   },[tab,unseen]);
+  useEffect(()=>{ if(tab==='notif' || tab==='chat') refresh(); },[tab]);
   function openChat(m){ setChatWith(m); setTab('chat'); }
 
   const tabs=[['swipe','🔥','Swiping',0],['notif','🔔','Notifications',tab==='notif'?0:unseen],['chat','💬','Chat',unread],['you','👤','You',0]];
