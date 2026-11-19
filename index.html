@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content" />
 <title>Sakura</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -114,6 +114,7 @@
   select{width:100%; padding:12px 14px; border-radius:12px; border:1.5px solid var(--line); font-size:15px; font-family:inherit; background:#FFFCFD; color:var(--ink); outline:none;}
   select:focus{border-color: var(--sakura);}
   body.app-mode{background-image: radial-gradient(120% 70% at 50% -10%, #3B1D6B 0%, transparent 60%) !important; background-color:#0E0A1A !important; background-attachment:scroll !important; padding:0;}
+  #root{width:100%; display:flex; justify-content:center;}
   .shell{width:100%; max-width:520px; height:100dvh; display:flex; flex-direction:column; background:#140E26; color:#F4EEFF; overflow:hidden; position:relative; padding-top:env(safe-area-inset-top,0px);}
   @media (min-width:480px){ body.app-mode{padding:24px 16px;} .shell{border-radius:28px; height:min(100dvh - 48px, 860px); border:1px solid #2E2250;} }
   .top{display:flex; align-items:center; justify-content:center; gap:8px; padding:16px 18px 8px; font-family:'Quicksand',sans-serif; font-weight:700; font-size:18px;}
@@ -143,6 +144,32 @@
   .photo-row{text-align:center; margin-bottom:18px;}
   .photo-row input{display:none;}
   .pcard.has-img .big{display:none;}
+  .main{min-height:0;} .main.flush{padding:0;}
+  .mini{border-radius:50%; background:#3A2C66 center/cover no-repeat; display:flex; align-items:center; justify-content:center; color:#E4D7FF; font-weight:700; flex-shrink:0; cursor:pointer;}
+  .sec{font-family:'Quicksand',sans-serif; font-weight:700; font-size:14px; color:#B9ADD9; margin:14px 0 8px;}
+  .row-item{display:flex; align-items:center; gap:12px; background:#1C1436; border:1px solid #2E2250; border-radius:16px; padding:10px 12px; margin-bottom:8px;}
+  .ri-info{flex:1; min-width:0; cursor:pointer;} .ri-info b{display:block; font-size:15px;}
+  .ri-info .meta{white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px;}
+  .ri-act{display:flex; flex-direction:column; gap:6px;}
+  .btn.sm{width:auto; padding:8px 14px; font-size:13px; border-radius:10px;}
+  .nav button span{position:relative;}
+  .badge{position:absolute; top:-4px; right:-10px; min-width:17px; height:17px; border-radius:9px; background:#E5484D; color:#fff; font-size:10px; font-family:'Inter',sans-serif; display:flex; align-items:center; justify-content:center; padding:0 4px; filter:none;}
+  .sheet{position:absolute; inset:0; z-index:20; background:#140E26; display:flex; flex-direction:column; overflow-y:auto; padding:0 18px 18px;}
+  .sheet.center{align-items:center; justify-content:center; text-align:center; gap:12px;}
+  .sheet-img{height:46%; min-height:260px; flex-shrink:0; margin:16px 0 14px; border-radius:24px; background:linear-gradient(160deg,#6D3BD2,#2A1760) center/cover no-repeat; display:flex; align-items:center; justify-content:center; font-size:110px; font-weight:700; color:rgba(255,255,255,.25);}
+  .sheet-body{flex:1;} .sheet-body h3{font-size:26px;} .sheet-body p{color:#D8CCF5; line-height:1.5;}
+  .chat-head{display:flex; align-items:center; gap:10px; padding:10px 14px; border-bottom:1px solid #2E2250;}
+  .chat-head .back{background:none; border:none; color:#C9B3FF; font-size:28px; cursor:pointer; padding:0 6px; line-height:1;}
+  .chat-msgs{flex:1; min-height:0; overflow-y:auto; padding:12px 14px; display:flex; flex-direction:column; gap:6px;}
+  .bub{max-width:78%; padding:9px 13px; border-radius:16px; font-size:14.5px; line-height:1.4; overflow-wrap:anywhere;}
+  .bub.me{align-self:flex-end; background:linear-gradient(135deg,#9B5CFF,#6D3BD2); border-bottom-right-radius:5px;}
+  .bub.them{align-self:flex-start; background:#2A2046; border-bottom-left-radius:5px;}
+  .bub small{display:block; font-size:10.5px; opacity:.7; margin-top:3px;}
+  .composer{display:flex; gap:8px; padding:10px 12px; border-top:1px solid #2E2250;}
+  .composer input{flex:1; background:#1C1436 !important; color:#F4EEFF !important; border-color:#2E2250;}
+  .composer button{width:46px; border:none; border-radius:12px; background:linear-gradient(135deg,#9B5CFF,#6D3BD2); color:#fff; font-size:18px; cursor:pointer;}
+  .convo{display:flex; align-items:center; gap:12px; padding:12px 4px; border-bottom:1px solid #251A44; cursor:pointer;}
+  .unread{background:#9B5CFF; color:#fff; border-radius:10px; min-width:20px; height:20px; font-size:11px; display:flex; align-items:center; justify-content:center; padding:0 6px;}
   .shell .btn{background:linear-gradient(135deg,#9B5CFF,#6D3BD2); box-shadow:none;}
   .shell .btn.ghost{background:none; border:1.5px solid #3A2C66; color:#C9B3FF;}
   @media (prefers-color-scheme: dark){
@@ -184,7 +211,7 @@ const BLOSSOM_SVG = '<svg width="28" height="28" viewBox="0 0 240 240" xmlns="ht
   + '</g><circle cx="120" cy="120" r="28" fill="#C94F76"/></svg>';
 
 function Logo(){
-  return h('div',{className:'mark'}, h('span',{className:'bud', dangerouslySetInnerHTML:{__html:BLOSSOM_SVG}}), h('span',null,'Sakura'), h('span',{style:{marginLeft:'auto',fontSize:10,opacity:.5}},'v4'));
+  return h('div',{className:'mark'}, h('span',{className:'bud', dangerouslySetInnerHTML:{__html:BLOSSOM_SVG}}), h('span',null,'Sakura'), h('span',{style:{marginLeft:'auto',fontSize:10,opacity:.5}},'v5'));
 }
 function Message({type,children}){
   if(!children) return null;
@@ -361,7 +388,8 @@ function ResetPasswordView({go, route}){
 }
 
 const LOOKING = ['Friendship','Serious relationship','Casual dating','Friendship or relationship'];
-function isComplete(p){ return !!(p && p.display_name && p.birthday && p.location && p.looking_for); }
+function normGender(g){ const s=(g||'').trim().toLowerCase(); if(['man','male','m','boy'].includes(s)) return 'Man'; if(['woman','female','f','girl'].includes(s)) return 'Woman'; return ''; }
+function isComplete(p){ return !!(p && p.display_name && p.birthday && p.location && p.looking_for && normGender(p.gender)); }
 function ageFrom(b){
   if(!b) return null;
   const d=new Date(b), t=new Date();
@@ -388,7 +416,7 @@ function resizeImage(file, max){
 function ProfileForm({user, profile, title, sub, submitLabel, onDone, onCancel}){
   const p = profile || {};
   const [name,setName]=useState(p.display_name||''); const [birthday,setBirthday]=useState(p.birthday||'');
-  const [gender,setGender]=useState(p.gender||''); const [orientation,setOrientation]=useState(p.orientation||'');
+  const [gender,setGender]=useState(normGender(p.gender)); const [orientation,setOrientation]=useState(p.orientation||'');
   const [bio,setBio]=useState(p.bio||'');
   const [location,setLocation]=useState(p.location||''); const [lookingFor,setLookingFor]=useState(p.looking_for||'');
   const [avatar,setAvatar]=useState(p.avatar_url||''); const [uploading,setUploading]=useState(false);
@@ -412,6 +440,7 @@ function ProfileForm({user, profile, title, sub, submitLabel, onDone, onCancel})
     if(!name.trim()){ setErr('Enter a display name.'); return; }
     if(!birthday){ setErr('Enter your birthday.'); return; }
     if(ageFrom(birthday) < 18){ setErr('You must be 18 or older to use Sakura.'); return; }
+    if(!gender){ setErr('Choose your gender.'); return; }
     if(!location.trim()){ setErr('Enter your city or area.'); return; }
     if(!lookingFor){ setErr('Choose what you are looking for.'); return; }
     setSaving(true);
@@ -433,7 +462,7 @@ function ProfileForm({user, profile, title, sub, submitLabel, onDone, onCancel})
       ),
       h('div',{className:'field'}, h('label',null,'Display name'), h('input',{type:'text',value:name,onChange:e=>setName(e.target.value),placeholder:'How others see you'})),
       h('div',{className:'field'}, h('label',null,'Birthday'), h('input',{type:'date',value:birthday,onChange:e=>setBirthday(e.target.value)})),
-      h('div',{className:'field'}, h('label',null,'Gender'), h('input',{type:'text',value:gender,onChange:e=>setGender(e.target.value),placeholder:'e.g. Woman, Man, Non-binary'})),
+      h('div',{className:'field'}, h('label',null,'Gender'), h('select',{value:gender,onChange:e=>setGender(e.target.value)}, h('option',{value:''},'Choose one'), h('option',{value:'Man'},'Man'), h('option',{value:'Woman'},'Woman'))),
       h('div',{className:'field'}, h('label',null,'Sexual orientation'), h('input',{type:'text',value:orientation,onChange:e=>setOrientation(e.target.value),placeholder:'e.g. Straight, Gay, Bisexual'})),
       h('div',{className:'field'}, h('label',null,'Location'), h('input',{type:'text',value:location,onChange:e=>setLocation(e.target.value),placeholder:'City or area, e.g. Lusaka, Zambia'})),
       h('div',{className:'field'}, h('label',null,'What are you looking for?'), h('select',{value:lookingFor,onChange:e=>setLookingFor(e.target.value)}, h('option',{value:''},'Choose one'), LOOKING.map(o=>h('option',{key:o,value:o},o)))),
@@ -459,28 +488,51 @@ function HomeView({data, go}){
   );
 }
 
-const SAMPLES=[
-  {id:'s1',display_name:'Alex',age:22,gender:'Woman',bio:'Loves music, travel and photography.',location:'Lusaka',looking_for:'Friendship or relationship'},
-  {id:'s2',display_name:'Daniel',age:24,gender:'Man',bio:'Anime, gaming and good vibes.',location:'Kitwe',looking_for:'Friendship'},
-  {id:'s3',display_name:'Sarah',age:23,gender:'Woman',bio:'Coffee, books and long walks.',location:'Ndola',looking_for:'Serious relationship'}
-];
+function fmtTime(t){
+  const d=new Date(t), n=new Date();
+  return d.toDateString()===n.toDateString() ? d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : d.toLocaleDateString([], {month:'short',day:'numeric'});
+}
+function Empty({title,text,children}){ return h('div',{className:'empty'}, h('b',null,title), h('div',null,text), children||null); }
+function Avatar({url,name,size,onClick}){
+  return h('div',{className:'mini',onClick,style:{width:size,height:size,fontSize:size*0.42,backgroundImage:url?'url('+url+')':undefined}}, url?null:(name||'?')[0]);
+}
+function ProfileSheet({p,onClose}){
+  return h('div',{className:'sheet'},
+    h('div',{className:'sheet-img',style:p.avatar_url?{backgroundImage:'url('+p.avatar_url+')'}:{}}, p.avatar_url?null:(p.display_name||'?')[0]),
+    h('div',{className:'sheet-body'},
+      h('h3',null,p.display_name+(p.age?', '+p.age:'')),
+      h('div',{className:'meta'}, p.location||''),
+      p.bio ? h('p',null,p.bio) : null,
+      h('div',{className:'tags'}, p.looking_for ? h('span',{className:'tag'},p.looking_for) : null, p.gender ? h('span',{className:'tag'},p.gender) : null)
+    ),
+    h('button',{className:'btn',onClick:onClose},'Close')
+  );
+}
+function PersonRow({p,onView,sub,children}){
+  return h('div',{className:'row-item'},
+    h(Avatar,{url:p.avatar_url,name:p.display_name,size:48,onClick:onView}),
+    h('div',{className:'ri-info',onClick:onView}, h('b',null,p.display_name+(p.age?', '+p.age:'')), h('div',{className:'meta'}, sub||[p.location,p.looking_for].filter(Boolean).join(' · '))),
+    h('div',{className:'ri-act'}, children)
+  );
+}
 
-function Empty({title,text}){ return h('div',{className:'empty'}, h('b',null,title), h('div',null,text)); }
-
-function SwipeTab({me}){
+function SwipeTab({active, act, setSheet}){
   const [deck,setDeck]=useState(null);
   const [dx,setDx]=useState(0); const [fly,setFly]=useState(0);
   const startX=React.useRef(null);
+  const empty = deck===null || deck.length===0;
   useEffect(()=>{
-    sb.rpc('get_discover_profiles').then(({data})=>{
-      setDeck(data && data.length ? data : SAMPLES.map(s=>({...s,sample:true})));
-    });
-  },[]);
+    if(!active || !empty) return;
+    const load=()=>sb.rpc('get_discover_profiles').then(({data})=>setDeck(data||[]));
+    load();
+    const t=setInterval(load,15000);
+    return ()=>clearInterval(t);
+  },[active,empty]);
   function decide(action){
     const c = deck && deck[0]; if(!c || fly) return;
     setFly(action==='like'?1:-1);
     setTimeout(()=>{
-      if(!c.sample) sb.from('swipes').insert({swiper_id:me.id,target_id:c.id,action});
+      act(c.id, action==='like'?'like':'pass');
       setDeck(d=>d.slice(1)); setFly(0); setDx(0);
     },220);
   }
@@ -488,22 +540,23 @@ function SwipeTab({me}){
   function move(e){ if(startX.current!==null) setDx(e.clientX-startX.current); }
   function up(){
     if(startX.current===null) return; startX.current=null;
-    if(dx>90) decide('like'); else if(dx<-90) decide('pass'); else setDx(0);
+    if(dx>90) decide('like'); else if(dx<-90) decide('pass');
+    else { if(Math.abs(dx)<6) setSheet(deck[0]); setDx(0); }
   }
   if(deck===null) return h(Empty,{title:'Finding people…',text:''});
   const c = deck[0];
-  if(!c) return h(Empty,{title:"You're all caught up",text:'No more profiles right now. Check back soon.'});
+  if(!c) return h(Empty,{title:"You're all caught up",text:'No one new right now. New people show up here automatically.'},
+    h('button',{className:'btn sm',style:{marginTop:10},onClick:()=>setDeck(null)},'Refresh'));
   const x = fly ? fly*480 : dx;
   return h('div',{style:{display:'flex',flexDirection:'column',flex:1}},
     h('div',{className:'deck'},
       h('div',{className:'pcard'+(c.avatar_url?' has-img':''), onPointerDown:down, onPointerMove:move, onPointerUp:up, onPointerCancel:up,
         style:{backgroundImage: c.avatar_url ? 'url('+c.avatar_url+')' : undefined, backgroundSize:'cover', backgroundPosition:'center', transform:'translateX('+x+'px) rotate('+(x/18)+'deg)', transition: startX.current===null ? 'transform .22s ease' : 'none'}},
-        c.sample ? h('div',{className:'sample'},'Sample profile') : null,
         h('div',{className:'big'}, (c.display_name||'?')[0]),
         h('h3',null, c.display_name+(c.age?', '+c.age:'')),
         h('div',{className:'meta'}, c.location||''),
         c.bio ? h('div',{className:'meta'}, c.bio) : null,
-        h('div',{className:'tags'}, c.looking_for ? h('span',{className:'tag'}, c.looking_for) : null, c.gender ? h('span',{className:'tag'}, c.gender) : null)
+        h('div',{className:'tags'}, c.looking_for ? h('span',{className:'tag'}, c.looking_for) : null)
       )
     ),
     h('div',{className:'acts'},
@@ -511,6 +564,81 @@ function SwipeTab({me}){
       h('button',{className:'round yes',onClick:()=>decide('like'),'aria-label':'Like'},'♥')
     )
   );
+}
+
+function NotifTab({inbox, act, openChat, setSheet}){
+  const [busy,setBusy]=useState('');
+  async function go(id,a){ setBusy(id); await act(id,a); setBusy(''); }
+  const fresh=inbox.matches.filter(m=>!m.last_body);
+  const sugg=inbox.sugg.filter(s=>!inbox.likes.some(l=>l.id===s.id));
+  const sec=(t)=>h('div',{className:'sec'},t);
+  return h('div',null,
+    fresh.length ? sec('New matches') : null,
+    fresh.map(m=>h(PersonRow,{key:m.match_id,p:m,onView:()=>setSheet(m),sub:"It's a match! You are now friends."},
+      h('button',{className:'btn sm',onClick:()=>openChat(m)},'Start chatting'))),
+    inbox.likes.length ? sec('Liked you') : null,
+    inbox.likes.map(p=>h(PersonRow,{key:p.id,p,onView:()=>setSheet(p),sub:'Liked you · '+fmtTime(p.liked_at)},
+      h('button',{className:'btn sm',disabled:busy===p.id,onClick:()=>go(p.id,'like')},'Like back'),
+      h('button',{className:'btn sm ghost',disabled:busy===p.id,onClick:()=>go(p.id,'pass')},'Pass'))),
+    sugg.length ? sec('Suggested for you') : null,
+    sugg.map(p=>h(PersonRow,{key:p.id,p,onView:()=>setSheet(p)},
+      h('button',{className:'btn sm',disabled:busy===p.id,onClick:()=>go(p.id,'like')},'Like'),
+      h('button',{className:'btn sm ghost',disabled:busy===p.id,onClick:()=>go(p.id,'pass')},'Dismiss'))),
+    (!fresh.length && !inbox.likes.length && !sugg.length) ? h(Empty,{title:'No notifications yet',text:'Likes, new matches and suggestions will show up here.'}) : null
+  );
+}
+
+function ChatScreen({match, me, back, setSheet, refresh}){
+  const [msgs,setMsgs]=useState([]); const [text,setText]=useState(''); const [err,setErr]=useState('');
+  const endRef=React.useRef(null);
+  async function load(){
+    const { data } = await sb.from('messages').select('*').eq('match_id',match.match_id).order('created_at',{ascending:true}).limit(300);
+    if(!data) return;
+    setMsgs(data);
+    if(data.some(m=>m.sender_id!==me.id && !m.read_at)){ await sb.rpc('mark_read',{p_match:match.match_id}); refresh(); }
+  }
+  useEffect(()=>{
+    load();
+    const t=setInterval(load,3000);
+    const ch=sb.channel('chat-'+match.match_id).on('postgres_changes',{event:'INSERT',schema:'public',table:'messages',filter:'match_id=eq.'+match.match_id},()=>load()).subscribe();
+    return ()=>{ clearInterval(t); sb.removeChannel(ch); };
+  },[match.match_id]);
+  useEffect(()=>{ if(endRef.current) endRef.current.scrollIntoView({block:'end'}); },[msgs.length]);
+  async function send(e){
+    e.preventDefault();
+    const body=text.trim(); if(!body) return;
+    setText(''); setErr('');
+    const { error } = await sb.from('messages').insert({match_id:match.match_id,sender_id:me.id,body});
+    if(error){ setText(body); setErr(error.message); return; }
+    load(); refresh();
+  }
+  const lastMine=[...msgs].reverse().find(m=>m.sender_id===me.id);
+  return h('div',{style:{flex:1,display:'flex',flexDirection:'column',minHeight:0}},
+    h('div',{className:'chat-head'},
+      h('button',{className:'back',onClick:back},'‹'),
+      h(Avatar,{url:match.avatar_url,name:match.display_name,size:38,onClick:()=>setSheet(match)}),
+      h('b',{onClick:()=>setSheet(match),style:{cursor:'pointer'}},match.display_name)),
+    h('div',{className:'chat-msgs'},
+      msgs.length===0 ? h(Empty,{title:'Say hi to '+match.display_name,text:'You matched. Send the first message.'}) : null,
+      msgs.map(m=>h('div',{key:m.id,className:'bub '+(m.sender_id===me.id?'me':'them')}, m.body,
+        h('small',null, fmtTime(m.created_at)+(lastMine && m.id===lastMine.id && m.read_at ? ' · Seen' : ''))
+      )),
+      h('div',{ref:endRef})),
+    err ? h('div',{className:'msg err',style:{margin:'0 12px 6px'}},err) : null,
+    h('form',{className:'composer',onSubmit:send},
+      h('input',{type:'text',value:text,onChange:e=>setText(e.target.value),placeholder:'Type a message…',maxLength:2000}),
+      h('button',{type:'submit','aria-label':'Send'},'➤'))
+  );
+}
+
+function ChatTab({inbox, me, chatWith, setChatWith, setSheet, refresh}){
+  if(chatWith) return h(ChatScreen,{match:chatWith,me,back:()=>{setChatWith(null); refresh();},setSheet,refresh});
+  if(!inbox.matches.length) return h('div',{className:'main flush',style:{display:'flex'}}, h(Empty,{title:'No chats yet',text:'When you and someone like each other, you can chat here.'}));
+  return h('div',{style:{padding:'8px 18px'}}, inbox.matches.map(m=>h('div',{key:m.match_id,className:'convo',onClick:()=>setChatWith(m)},
+    h(Avatar,{url:m.avatar_url,name:m.display_name,size:52}),
+    h('div',{className:'ri-info'}, h('b',null,m.display_name), h('div',{className:'meta'}, m.last_body ? (m.last_sender===me.id?'You: ':'')+m.last_body : 'Say hi!')),
+    h('div',{style:{textAlign:'right'}}, m.last_at ? h('div',{className:'meta'},fmtTime(m.last_at)) : null, m.unread>0 ? h('div',{className:'unread',style:{marginLeft:'auto',marginTop:4}},m.unread) : null)
+  )));
 }
 
 function YouTab({data, go}){
@@ -527,17 +655,63 @@ function YouTab({data, go}){
 }
 
 function MainApp({data, go}){
+  const me = data.user;
   const [tab,setTab]=useState('swipe');
+  const [inbox,setInbox]=useState({likes:[],matches:[],sugg:[]});
+  const [seen,setSeen]=useState(new Date((data.profile && data.profile.notif_seen_at) || 0).getTime());
+  const [chatWith,setChatWith]=useState(null);
+  const [sheet,setSheet]=useState(null); const [pop,setPop]=useState(null);
   useEffect(()=>{ document.body.classList.add('app-mode'); return ()=>document.body.classList.remove('app-mode'); },[]);
-  const tabs=[['swipe','🔥','Swiping'],['notif','🔔','Notifications'],['chat','💬','Chat'],['you','👤','You']];
-  const pane=(id,child)=>h('div',{className:'main',style:{display: tab===id?'flex':'none'}}, child);
+
+  const refresh = React.useCallback(async ()=>{
+    const [l,m,s] = await Promise.all([sb.rpc('get_likes_received'), sb.rpc('get_my_matches'), sb.rpc('get_suggestions')]);
+    const st = {likes:l.data||[], matches:m.data||[], sugg:s.data||[]};
+    setInbox(st); return st;
+  },[]);
+  useEffect(()=>{
+    refresh();
+    const t=setInterval(refresh,10000);
+    const ch=sb.channel('inbox')
+      .on('postgres_changes',{event:'INSERT',schema:'public',table:'messages'},()=>refresh())
+      .on('postgres_changes',{event:'INSERT',schema:'public',table:'matches'},()=>refresh())
+      .subscribe();
+    return ()=>{ clearInterval(t); sb.removeChannel(ch); };
+  },[]);
+
+  async function act(target, action){
+    const { error } = await sb.from('swipes').insert({swiper_id:me.id,target_id:target,action});
+    if(error) return;
+    const st = await refresh();
+    const m = st.matches.find(x=>x.other_id===target);
+    if(action==='like' && m) setPop(m);
+  }
+  const unseen = inbox.likes.filter(l=>new Date(l.liked_at).getTime()>seen).length + inbox.matches.filter(m=>!m.last_body && new Date(m.matched_at).getTime()>seen).length;
+  const unread = inbox.matches.reduce((n,m)=>n+m.unread,0);
+  useEffect(()=>{
+    if(tab==='notif' && unseen>0){
+      const now=Date.now(); setSeen(now);
+      sb.from('profiles').update({notif_seen_at:new Date(now).toISOString()}).eq('id',me.id);
+    }
+  },[tab,unseen]);
+  function openChat(m){ setChatWith(m); setTab('chat'); }
+
+  const tabs=[['swipe','🔥','Swiping',0],['notif','🔔','Notifications',tab==='notif'?0:unseen],['chat','💬','Chat',unread],['you','👤','You',0]];
+  const pane=(id,child,flush)=>h('div',{className:'main'+(flush?' flush':''),style:{display: tab===id?'flex':'none'}}, child);
   return h('div',{className:'shell'},
     h('div',{className:'top'},'🌸 Sakura'),
-    pane('swipe', h(SwipeTab,{me:data.user})),
-    pane('notif', h(Empty,{title:'No notifications yet',text:'Likes, new matches and suggestions will show up here.'})),
-    pane('chat', h(Empty,{title:'No chats yet',text:'When you and someone like each other, you can chat here.'})),
+    pane('swipe', h(SwipeTab,{active:tab==='swipe',act,setSheet})),
+    pane('notif', h(NotifTab,{inbox,act,openChat,setSheet})),
+    pane('chat', h(ChatTab,{inbox,me,chatWith,setChatWith,setSheet,refresh}), !!chatWith),
     pane('you', h(YouTab,{data,go})),
-    h('div',{className:'nav'}, tabs.map(([id,icon,label])=>h('button',{key:id,className:tab===id?'on':'',onClick:()=>setTab(id)}, h('span',null,icon), label)))
+    h('div',{className:'nav'}, tabs.map(([id,icon,label,n])=>h('button',{key:id,className:tab===id?'on':'',onClick:()=>setTab(id)},
+      h('span',null,icon,n>0?h('i',{className:'badge'},n>99?'99+':n):null), label))),
+    sheet ? h(ProfileSheet,{p:sheet,onClose:()=>setSheet(null)}) : null,
+    pop ? h('div',{className:'sheet center'},
+      h('h2',null,"It's a match!"),
+      h(Avatar,{url:pop.avatar_url,name:pop.display_name,size:110}),
+      h('p',null,'You and '+pop.display_name+' liked each other. You are now friends.'),
+      h('button',{className:'btn',onClick:()=>{setPop(null); openChat(pop);}},'Start chatting'),
+      h('button',{className:'btn ghost',onClick:()=>setPop(null)},'Keep swiping')) : null
   );
 }
 
