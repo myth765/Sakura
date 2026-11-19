@@ -170,6 +170,22 @@
   .composer button{width:46px; border:none; border-radius:12px; background:linear-gradient(135deg,#9B5CFF,#6D3BD2); color:#fff; font-size:18px; cursor:pointer;}
   .convo{display:flex; align-items:center; gap:12px; padding:12px 4px; border-bottom:1px solid #251A44; cursor:pointer;}
   .unread{background:#9B5CFF; color:#fff; border-radius:10px; min-width:20px; height:20px; font-size:11px; display:flex; align-items:center; justify-content:center; padding:0 6px;}
+  .seg{display:flex; gap:6px; background:#1C1436; border-radius:14px; padding:4px; margin-bottom:12px;}
+  .seg button{flex:1; border:none; background:none; color:#B9ADD9; font-family:inherit; font-size:13px; padding:9px 4px; border-radius:11px; cursor:pointer; white-space:nowrap;}
+  .seg button.on{background:linear-gradient(135deg,#9B5CFF,#6D3BD2); color:#fff; font-weight:600;}
+  .badge.dot{min-width:10px; height:10px; padding:0; top:-2px; right:-7px;}
+  .gal-wrap{position:relative; margin:16px 0 14px; flex-shrink:0;}
+  .gal{display:flex; overflow-x:auto; scroll-snap-type:x mandatory; border-radius:24px; height:min(52vh,420px); scrollbar-width:none;}
+  .gal::-webkit-scrollbar{display:none;}
+  .gslide{flex:0 0 100%; scroll-snap-align:center; background:#2A1760 center/cover no-repeat;}
+  .gcount{position:absolute; top:12px; right:12px; background:rgba(0,0,0,.55); color:#fff; padding:4px 10px; border-radius:999px; font-size:12px;}
+  .gal-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:8px;}
+  .gslot{position:relative; aspect-ratio:3/4; border-radius:12px; background:var(--blush-2) center/cover no-repeat; display:flex; align-items:center; justify-content:center; font-size:26px; color:var(--sakura-deep); cursor:pointer;}
+  .gslot.empty{border:2px dashed #E05A6D;}
+  .gslot input{display:none;}
+  .gx{position:absolute; top:-6px; right:-6px; width:22px; height:22px; border-radius:50%; border:none; background:#C24B4B; color:#fff; font-size:14px; line-height:1; cursor:pointer;}
+  .btn.danger{background:linear-gradient(135deg,#D95C5C,#B03A3A); box-shadow:none;}
+  .shell .btn.ghost.red{color:#FF8A8A; border-color:#5A2A33;}
   .shell .btn{background:linear-gradient(135deg,#9B5CFF,#6D3BD2); box-shadow:none;}
   .shell .btn.ghost{background:none; border:1.5px solid #3A2C66; color:#C9B3FF;}
   @media (prefers-color-scheme: dark){
@@ -196,6 +212,7 @@ const { useState, useEffect } = React;
 
 const SUPABASE_URL = 'https://nnlrogdehrmdgyarxyhz.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ubHJvZ2RlaHJtZGd5YXJ4eWh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA0NTA1MTUsImV4cCI6MjEwNjAyNjUxNX0.UToKAdLrTF8its_opVsNxqnmT1_-MKO1bKQ5hEyKZNA';
+const FROM_LINK = /access_token|type=magiclink|type=email/.test(window.location.hash);
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const REDIRECT_URL = window.location.href.split('#')[0];
 
@@ -211,14 +228,14 @@ const BLOSSOM_SVG = '<svg width="28" height="28" viewBox="0 0 240 240" xmlns="ht
   + '</g><circle cx="120" cy="120" r="28" fill="#C94F76"/></svg>';
 
 function Logo(){
-  return h('div',{className:'mark'}, h('span',{className:'bud', dangerouslySetInnerHTML:{__html:BLOSSOM_SVG}}), h('span',null,'Sakura'), h('span',{style:{marginLeft:'auto',fontSize:10,opacity:.5}},'v6'));
+  return h('div',{className:'mark'}, h('span',{className:'bud', dangerouslySetInnerHTML:{__html:BLOSSOM_SVG}}), h('span',null,'Sakura'), h('span',{style:{marginLeft:'auto',fontSize:10,opacity:.5}},'v7'));
 }
 function Message({type,children}){
   if(!children) return null;
   return h('div',{className:'msg '+type}, children);
 }
 
-function LoginView({go, route, prefillEmail}){
+function LoginView({go, route, prefillEmail, notice}){
   const [email,setEmail]=useState(prefillEmail||'');
   const [pw,setPw]=useState('');
   const [show,setShow]=useState(false);
@@ -245,6 +262,7 @@ function LoginView({go, route, prefillEmail}){
   return h('div',{className:'card'},
     h(Logo),
     h('div',{className:'sub'},'Welcome back. Log in to keep swiping 💗'),
+    h(Message,{type:'ok'}, notice),
     h(Message,{type:'err'}, err),
     h('form',{onSubmit:submit},
       h('div',{className:'field'}, h('label',null,'Email'), h('input',{type:'email',value:email,onChange:e=>setEmail(e.target.value),placeholder:'you@example.com',autoComplete:'email'})),
@@ -413,13 +431,28 @@ function resizeImage(file, max){
   });
 }
 
-function ProfileForm({user, profile, title, sub, submitLabel, onDone, onCancel}){
+function ProfileForm({user, profile, title, sub, submitLabel, onDone, onCancel, extra, focus}){
   const p = profile || {};
   const [name,setName]=useState(p.display_name||''); const [birthday,setBirthday]=useState(p.birthday||'');
   const [gender,setGender]=useState(normGender(p.gender)); const [orientation,setOrientation]=useState(p.orientation||'');
   const [bio,setBio]=useState(p.bio||'');
   const [location,setLocation]=useState(p.location||''); const [lookingFor,setLookingFor]=useState(p.looking_for||'');
   const [avatar,setAvatar]=useState(p.avatar_url||''); const [uploading,setUploading]=useState(false);
+  const [photos,setPhotos]=useState(p.photos||[]); const galRef=React.useRef(null);
+  useEffect(()=>{ if(extra && focus && galRef.current) galRef.current.scrollIntoView({block:'center'}); },[]);
+  async function addGallery(e){
+    const f=e.target.files && e.target.files[0]; e.target.value=''; if(!f) return;
+    setErr(''); setUploading(true);
+    try{
+      const blob=await resizeImage(f,1000);
+      const path=user.id+'/g'+Date.now()+'.jpg';
+      const { error } = await sb.storage.from('avatars').upload(path, blob, {contentType:'image/jpeg'});
+      if(error) throw error;
+      const url=sb.storage.from('avatars').getPublicUrl(path).data.publicUrl;
+      setPhotos(ph=>[...ph,url].slice(0,4));
+    }catch(ex){ setErr(ex.message||'Photo upload failed.'); }
+    setUploading(false);
+  }
   const [saving,setSaving]=useState(false); const [err,setErr]=useState('');
 
   async function pickPhoto(e){
@@ -445,10 +478,12 @@ function ProfileForm({user, profile, title, sub, submitLabel, onDone, onCancel})
     if(!lookingFor){ setErr('Choose what you are looking for.'); return; }
     setSaving(true);
     const row = { id:user.id, email:user.email, display_name:name.trim(), birthday, gender, orientation, bio, location:location.trim(), looking_for:lookingFor, avatar_url:avatar||null, updated_at:new Date().toISOString() };
+    if(extra) row.photos = photos;
     const { error } = await sb.from('profiles').upsert(row);
     setSaving(false);
     if(error){ setErr(error.message); return; }
-    onDone(row);
+    if(extra){ const gone=(p.photos||[]).filter(u=>!photos.includes(u)).map(u=>u.split('/avatars/')[1]).filter(Boolean); if(gone.length) sb.storage.from('avatars').remove(gone); }
+    onDone({...p, ...row});
   }
 
   return h('div',{className:'card'},
@@ -460,6 +495,12 @@ function ProfileForm({user, profile, title, sub, submitLabel, onDone, onCancel})
         h('div',{className:'avatar',style:avatar?{backgroundImage:'url('+avatar+')'}:{}}, avatar?null:'📷'),
         h('label',{className:'link',style:{cursor:'pointer'}}, uploading?'Uploading…':(avatar?'Change photo':'Add profile photo'), h('input',{type:'file',accept:'image/*',onChange:pickPhoto,disabled:uploading}))
       ),
+      extra ? h('div',{className:'field',ref:galRef},
+        h('label',null,'More photos ('+photos.length+'/4)'),
+        h('div',{className:'gal-grid'},
+          photos.map(u=>h('div',{key:u,className:'gslot',style:{backgroundImage:'url('+u+')'}}, h('button',{type:'button',className:'gx',onClick:()=>setPhotos(ph=>ph.filter(x=>x!==u))},'×'))),
+          Array.from({length:4-photos.length}).map((_,k)=>h('label',{key:'e'+k,className:'gslot empty'},'+',h('input',{type:'file',accept:'image/*',onChange:addGallery,disabled:uploading})))),
+        photos.length<4 ? h('div',{className:'meta',style:{marginTop:6,color:'#7A6A70'}},'Add '+(4-photos.length)+' more so people can see more of you.') : null) : null,
       h('div',{className:'field'}, h('label',null,'Display name'), h('input',{type:'text',value:name,onChange:e=>setName(e.target.value),placeholder:'How others see you'})),
       h('div',{className:'field'}, h('label',null,'Birthday'), h('input',{type:'date',value:birthday,onChange:e=>setBirthday(e.target.value)})),
       h('div',{className:'field'}, h('label',null,'Gender'), h('select',{value:gender,onChange:e=>setGender(e.target.value)}, h('option',{value:''},'Choose one'), h('option',{value:'Man'},'Man'), h('option',{value:'Woman'},'Woman'))),
@@ -497,8 +538,13 @@ function Avatar({url,name,size,onClick}){
   return h('div',{className:'mini',onClick,style:{width:size,height:size,fontSize:size*0.42,backgroundImage:url?'url('+url+')':undefined}}, url?null:(name||'?')[0]);
 }
 function ProfileSheet({p,onClose}){
+  const imgs=[p.avatar_url].concat(p.photos||[]).filter(Boolean);
+  const [i,setI]=useState(0);
   return h('div',{className:'sheet'},
-    h('div',{className:'sheet-img',style:p.avatar_url?{backgroundImage:'url('+p.avatar_url+')'}:{}}, p.avatar_url?null:(p.display_name||'?')[0]),
+    imgs.length ? h('div',{className:'gal-wrap'},
+      h('div',{className:'gal',onScroll:e=>setI(Math.round(e.target.scrollLeft/e.target.clientWidth))}, imgs.map((u,k)=>h('div',{key:k,className:'gslide',style:{backgroundImage:'url('+u+')'}}))),
+      imgs.length>1 ? h('div',{className:'gcount'},(i+1)+' / '+imgs.length) : null)
+    : h('div',{className:'sheet-img'},(p.display_name||'?')[0]),
     h('div',{className:'sheet-body'},
       h('h3',null,p.display_name+(p.age?', '+p.age:'')),
       h('div',{className:'meta'}, p.location||''),
@@ -566,26 +612,26 @@ function SwipeTab({active, act, setSheet}){
   );
 }
 
-function NotifTab({inbox, act, openChat, setSheet}){
-  const [busy,setBusy]=useState('');
+function NotifTab({inbox, act, openChat, setSheet, active}){
+  const [busy,setBusy]=useState(''); const [sub,setSub]=useState('likes');
+  useEffect(()=>{ if(active) setSub('likes'); },[active]);
   async function go(id,a){ setBusy(id); await act(id,a); setBusy(''); }
   const recent=inbox.matches.filter(m=>Date.now()-new Date(m.matched_at).getTime() < 7*864e5);
   const sugg=inbox.sugg.filter(s=>!inbox.likes.some(l=>l.id===s.id));
-  const sec=(t)=>h('div',{className:'sec'},t);
-  const none=(t)=>h('div',{className:'meta',style:{padding:'2px 4px 8px'}},t);
-  return h('div',null,
-    sec('Likes'),
-    inbox.likes.length ? inbox.likes.map(p=>h(PersonRow,{key:p.id,p,onView:()=>setSheet(p),sub:'Liked you · '+fmtTime(p.liked_at)},
+  const none=(t)=>h('div',{className:'empty',style:{padding:'40px 10px'}},t);
+  let body;
+  if(sub==='likes') body = inbox.likes.length ? inbox.likes.map(p=>h(PersonRow,{key:p.id,p,onView:()=>setSheet(p),sub:'Liked you · '+fmtTime(p.liked_at)},
       h('button',{className:'btn sm',disabled:busy===p.id,onClick:()=>go(p.id,'like')},'Like back'),
-      h('button',{className:'btn sm ghost',disabled:busy===p.id,onClick:()=>go(p.id,'pass')},'Pass'))) : none('No new likes yet. When someone likes you, they show up here.'),
-    sec('Recent matches (last 7 days)'),
-    recent.length ? recent.map(m=>h(PersonRow,{key:m.match_id,p:m,onView:()=>setSheet(m),sub:m.last_body?'Last message: '+m.last_body:"It's a match! Say hi."},
-      h('button',{className:'btn sm',onClick:()=>openChat(m)},m.last_body?'Open chat':'Start chatting'))) : none('No matches in the last 7 days.'),
-    sec('Suggestions'),
-    sugg.length ? sugg.map(p=>h(PersonRow,{key:p.id,p,onView:()=>setSheet(p)},
+      h('button',{className:'btn sm ghost',disabled:busy===p.id,onClick:()=>go(p.id,'pass')},'Pass'))) : none('No new likes yet. When someone likes you, they show up here.');
+  else if(sub==='matches') body = recent.length ? [h('div',{key:'hint',className:'meta',style:{margin:'0 2px 8px'}},'Matches from the last 7 days. Older ones stay in Chat.')].concat(recent.map(m=>h(PersonRow,{key:m.match_id,p:m,onView:()=>setSheet(m),sub:m.last_body?'Last message: '+m.last_body:"It's a match! Say hi."},
+      h('button',{className:'btn sm',onClick:()=>openChat(m)},m.last_body?'Open chat':'Start chatting')))) : none('No matches in the last 7 days.');
+  else body = sugg.length ? sugg.map(p=>h(PersonRow,{key:p.id,p,onView:()=>setSheet(p)},
       h('button',{className:'btn sm',disabled:busy===p.id,onClick:()=>go(p.id,'like')},'Like'),
-      h('button',{className:'btn sm ghost',disabled:busy===p.id,onClick:()=>go(p.id,'pass')},'Dismiss'))) : none('No suggestions right now. Check back soon.')
-  );
+      h('button',{className:'btn sm ghost',disabled:busy===p.id,onClick:()=>go(p.id,'pass')},'Dismiss'))) : none('No suggestions right now. Check back soon.');
+  const tab=(id,label,n)=>h('button',{className:sub===id?'on':'',onClick:()=>setSub(id)}, label+(n?' ('+n+')':''));
+  return h('div',null,
+    h('div',{className:'seg'}, tab('likes','Likes',inbox.likes.length), tab('matches','Matches',recent.length), tab('sugg','Suggestions',sugg.length)),
+    body);
 }
 
 function ChatScreen({match, me, back, setSheet, refresh}){
@@ -643,20 +689,23 @@ function ChatTab({inbox, me, chatWith, setChatWith, setSheet, refresh}){
 
 function YouTab({data, go}){
   const p = data.profile||{}; const age = ageFrom(p.birthday);
+  const photoCount=(p.photos||[]).length; const missing=photoCount<4;
   async function logout(){ await sb.auth.signOut(); go('login'); }
   return h('div',null,
     h('div',{className:'avatar',style:p.avatar_url?{backgroundImage:'url('+p.avatar_url+')'}:{}}, p.avatar_url?null:((p.display_name||'?')[0])),
     h('div',{className:'you-row'}, h('b',null,(p.display_name||'You')+(age!==null?', '+age:'')), h('div',{className:'meta'}, [p.location,p.gender].filter(Boolean).join(' · ')), p.bio ? h('div',{className:'meta'},p.bio) : null),
     h('div',{className:'you-row'}, 'Looking for: '+(p.looking_for||'Not set')),
-    h('button',{className:'btn',onClick:()=>go('editProfile',data)},'Edit profile'),
+    missing ? h('div',{className:'you-row'}, 'Photos: '+(1+photoCount)+' of 5. Add '+(4-photoCount)+' more in Edit profile so people can see more of you.') : null,
+    h('button',{className:'btn',style:{position:'relative'},onClick:()=>go('editProfile',{...data,focus:missing})}, 'Edit profile', missing ? h('i',{className:'badge dot',style:{top:8,right:10}}) : null),
     h('button',{className:'btn ghost',style:{marginTop:10},onClick:()=>go('home',data)},'Back to welcome'),
-    h('button',{className:'btn ghost',style:{marginTop:10},onClick:logout},'Log out')
+    h('button',{className:'btn ghost',style:{marginTop:10},onClick:logout},'Log out'),
+    h('button',{className:'btn ghost red',style:{marginTop:10},onClick:()=>go('deleteAccount',data)},'Delete account')
   );
 }
 
 function MainApp({data, go}){
   const me = data.user;
-  const [tab,setTab]=useState('swipe');
+  const [tab,setTab]=useState(data.tab||'swipe');
   const [inbox,setInbox]=useState({likes:[],matches:[],sugg:[]});
   const [seen,setSeen]=useState(new Date((data.profile && data.profile.notif_seen_at) || 0).getTime());
   const [chatWith,setChatWith]=useState(null);
@@ -696,16 +745,16 @@ function MainApp({data, go}){
   useEffect(()=>{ if(tab==='notif' || tab==='chat') refresh(); },[tab]);
   function openChat(m){ setChatWith(m); setTab('chat'); }
 
-  const tabs=[['swipe','🔥','Swiping',0],['notif','🔔','Notifications',tab==='notif'?0:unseen],['chat','💬','Chat',unread],['you','👤','You',0]];
+  const tabs=[['swipe','🔥','Swiping',0],['notif','🔔','Notifications',tab==='notif'?0:unseen],['chat','💬','Chat',unread],['you','👤','You',0,((data.profile&&data.profile.photos)||[]).length<4]];
   const pane=(id,child,flush)=>h('div',{className:'main'+(flush?' flush':''),style:{display: tab===id?'flex':'none'}}, child);
   return h('div',{className:'shell'},
     h('div',{className:'top'},'🌸 Sakura'),
     pane('swipe', h(SwipeTab,{active:tab==='swipe',act,setSheet})),
-    pane('notif', h(NotifTab,{inbox,act,openChat,setSheet})),
+    pane('notif', h(NotifTab,{inbox,act,openChat,setSheet,active:tab==='notif'})),
     pane('chat', h(ChatTab,{inbox,me,chatWith,setChatWith,setSheet,refresh}), !!chatWith),
     pane('you', h(YouTab,{data,go})),
-    h('div',{className:'nav'}, tabs.map(([id,icon,label,n])=>h('button',{key:id,className:tab===id?'on':'',onClick:()=>setTab(id)},
-      h('span',null,icon,n>0?h('i',{className:'badge'},n>99?'99+':n):null), label))),
+    h('div',{className:'nav'}, tabs.map(([id,icon,label,n,dot])=>h('button',{key:id,className:tab===id?'on':'',onClick:()=>setTab(id)},
+      h('span',null,icon,n>0?h('i',{className:'badge'},n>99?'99+':n):(dot?h('i',{className:'badge dot'}):null)), label))),
     sheet ? h(ProfileSheet,{p:sheet,onClose:()=>setSheet(null)}) : null,
     pop ? h('div',{className:'sheet center'},
       h('h2',null,"It's a match!"),
@@ -713,6 +762,55 @@ function MainApp({data, go}){
       h('p',null,'You and '+pop.display_name+' liked each other. You are now friends.'),
       h('button',{className:'btn',onClick:()=>{setPop(null); openChat(pop);}},'Start chatting'),
       h('button',{className:'btn ghost',onClick:()=>setPop(null)},'Keep swiping')) : null
+  );
+}
+
+function DeleteRequestView({data, go}){
+  const [sent,setSent]=useState(false); const [err,setErr]=useState(''); const [loading,setLoading]=useState(false);
+  async function send(){
+    setErr(''); setLoading(true);
+    const { error } = await sb.auth.signInWithOtp({ email:data.user.email, options:{ shouldCreateUser:false, emailRedirectTo:REDIRECT_URL } });
+    setLoading(false);
+    if(error){ setErr(error.message); return; }
+    localStorage.setItem('sakura_pending_delete', String(Date.now()));
+    setSent(true);
+  }
+  return h('div',{className:'card'},
+    h(Logo),
+    h('div',{className:'sub'},'Delete your account'),
+    h(Message,{type:'err'}, err),
+    sent ? h(Message,{type:'ok'}, 'We sent a confirmation email to '+data.user.email+'. Open the link in it on this device to finish. Nothing is deleted until you confirm there.')
+      : h('div',null,
+          h('p',{style:{fontSize:14,lineHeight:1.5,marginTop:0}},'This permanently deletes your profile, photos, likes, matches and messages. It cannot be undone. For your safety we will email you a confirmation link first.'),
+          h('button',{className:'btn danger',onClick:send,disabled:loading},loading?'Sending…':'Send confirmation email')),
+    h('div',{className:'foot'}, h('button',{className:'link',onClick:()=>{localStorage.removeItem('sakura_pending_delete'); go('main',{...data,tab:'you'});}},'Cancel and go back'))
+  );
+}
+
+function ConfirmDeleteView({data, go}){
+  const [err,setErr]=useState(''); const [busy,setBusy]=useState(false);
+  async function doDelete(){
+    setErr(''); setBusy(true);
+    const uid=data.user.id;
+    try{
+      const { data:files } = await sb.storage.from('avatars').list(uid);
+      if(files && files.length) await sb.storage.from('avatars').remove(files.map(f=>uid+'/'+f.name));
+    }catch(e){}
+    const { error } = await sb.rpc('delete_my_account');
+    if(error){ setBusy(false); setErr(error.message); return; }
+    localStorage.removeItem('sakura_pending_delete');
+    try{ await sb.auth.signOut({scope:'local'}); }catch(e){}
+    go('login',{notice:'Your account has been permanently deleted.'});
+  }
+  function cancel(){ localStorage.removeItem('sakura_pending_delete'); route2(); }
+  async function route2(){ go('main',{user:data.user, profile:(await sb.from('profiles').select('*').eq('id',data.user.id).maybeSingle()).data||{}, tab:'you'}); }
+  return h('div',{className:'card'},
+    h(Logo),
+    h('div',{className:'sub'},'Email confirmed. Last step.'),
+    h(Message,{type:'err'}, err),
+    h('p',{style:{fontSize:14,lineHeight:1.5,marginTop:0}},'Permanently delete your account? Your profile, photos, likes, matches and messages will be removed and cannot be recovered.'),
+    h('button',{className:'btn danger',onClick:doDelete,disabled:busy},busy?'Deleting…':'Yes, delete my account permanently'),
+    h('button',{className:'btn ghost',style:{marginTop:10},onClick:cancel,disabled:busy},'No, keep my account')
   );
 }
 
@@ -724,6 +822,8 @@ function App(){
   function go(next, d){ viewRef.current = next; setData(d||{}); setView(next); }
 
   async function route(user){
+    const pd = Number(localStorage.getItem('sakura_pending_delete')||0);
+    if(FROM_LINK && pd && Date.now()-pd < 3600e3){ go('confirmDelete',{user}); return; }
     const { data:row } = await sb.from('profiles').select('*').eq('id', user.id).maybeSingle();
     go(isComplete(row) ? 'home' : 'onboarding', { user, profile: row || {} });
   }
@@ -749,10 +849,12 @@ function App(){
   if(view==='forgot') return h(ForgotView,{data,go});
   if(view==='resetPassword') return h(ResetPasswordView,{go,route});
   if(view==='onboarding') return h(ProfileForm,{user:data.user, profile:data.profile, title:'Set up your profile', sub:'Tell us a bit about you to finish creating your account.', submitLabel:'Finish and continue', onDone:(row)=>go('home',{user:data.user, profile:row})});
-  if(view==='editProfile') return h(ProfileForm,{user:data.user, profile:data.profile, sub:'Update your profile details.', submitLabel:'Save changes', onDone:(row)=>go('home',{user:data.user, profile:row}), onCancel:()=>go('home',data)});
+  if(view==='editProfile') return h(ProfileForm,{user:data.user, profile:data.profile, sub:'Update your profile details.', submitLabel:'Save changes', extra:true, focus:data.focus, onDone:(row)=>go('main',{user:data.user, profile:row, tab:'you'}), onCancel:()=>go('main',{...data,tab:'you'})});
+  if(view==='deleteAccount') return h(DeleteRequestView,{data,go});
+  if(view==='confirmDelete') return h(ConfirmDeleteView,{data,go});
   if(view==='main') return h(MainApp,{data,go});
   if(view==='home') return h(HomeView,{data,go});
-  return h(LoginView,{go, route, prefillEmail:data.email});
+  return h(LoginView,{go, route, prefillEmail:data.email, notice:data.notice});
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(h(App));
