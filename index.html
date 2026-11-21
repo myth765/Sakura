@@ -186,6 +186,20 @@
   .gx{position:absolute; top:-6px; right:-6px; width:22px; height:22px; border-radius:50%; border:none; background:#C24B4B; color:#fff; font-size:14px; line-height:1; cursor:pointer;}
   .btn.danger{background:linear-gradient(135deg,#D95C5C,#B03A3A); box-shadow:none;}
   .shell .btn.ghost.red{color:#FF8A8A; border-color:#5A2A33;}
+  .sheet.top{z-index:30;}
+  .sheet select,.sheet textarea{width:100%; padding:12px 14px; border-radius:12px; border:1.5px solid #2E2250; font-size:15px; font-family:inherit; background:#1C1436; color:#F4EEFF; outline:none;}
+  .sheet textarea{min-height:90px; resize:vertical;}
+  .chat-head{position:relative;}
+  .menu{position:absolute; right:12px; top:54px; background:#1C1436; border:1px solid #2E2250; border-radius:12px; z-index:5; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,.4);}
+  .menu button{display:block; width:100%; background:none; border:none; color:#F4EEFF; padding:12px 22px; text-align:left; font-family:inherit; font-size:14px; cursor:pointer;}
+  .switch{display:flex; align-items:center; justify-content:space-between; gap:12px;}
+  .switch input{width:20px; height:20px; accent-color:#9B5CFF; flex-shrink:0;}
+  .legal{max-height:56vh; overflow-y:auto; font-size:13.5px; line-height:1.55; padding-right:4px;}
+  .legal h4{margin:14px 0 4px; font-size:14px; font-family:'Quicksand',sans-serif;}
+  .legal p{margin:0 0 6px;}
+  .sheet .legal{max-height:none;}
+  .card .seg{background:var(--blush-2);} .card .seg button{color:var(--ink-soft);} .card .seg button.on{color:#fff;}
+  .tipbar{display:flex; gap:10px; align-items:center; background:#2A1760; border-bottom:1px solid #3A2C66; padding:10px 14px; font-size:13.5px;}
   .shell .btn{background:linear-gradient(135deg,#9B5CFF,#6D3BD2); box-shadow:none;}
   .shell .btn.ghost{background:none; border:1.5px solid #3A2C66; color:#C9B3FF;}
   @media (prefers-color-scheme: dark){
@@ -228,14 +242,68 @@ const BLOSSOM_SVG = '<svg width="28" height="28" viewBox="0 0 240 240" xmlns="ht
   + '</g><circle cx="120" cy="120" r="28" fill="#C94F76"/></svg>';
 
 function Logo(){
-  return h('div',{className:'mark'}, h('span',{className:'bud', dangerouslySetInnerHTML:{__html:BLOSSOM_SVG}}), h('span',null,'Sakura'), h('span',{style:{marginLeft:'auto',fontSize:10,opacity:.5}},'v7'));
+  return h('div',{className:'mark'}, h('span',{className:'bud', dangerouslySetInnerHTML:{__html:BLOSSOM_SVG}}), h('span',null,'Sakura'), h('span',{style:{marginLeft:'auto',fontSize:10,opacity:.5}},'v10'));
 }
 function Message({type,children}){
   if(!children) return null;
   return h('div',{className:'msg '+type}, children);
 }
 
+const TERMS_VERSION='2026-11-20';
+const CONTACT='phiribernard765@gmail.com';
+const TERMS=[
+['1. About these Terms',`These Terms of Service ("Terms") are a legal agreement between you and Bernard Phiri, the operator of Sakura ("Sakura", "we", "us" or "our"). They apply to your use of the Sakura website and application and all related services (the "Service"). By creating an account, ticking the agreement box, or using the Service, you confirm that you have read, understood and agree to be bound by these Terms and our Privacy Policy. If you do not agree, do not use the Service.`],
+['2. Who may use Sakura',`You may use Sakura only if: (a) you are at least 18 years old; (b) you are legally able to enter into a binding agreement; (c) you are not prohibited from using the Service under the laws of Zambia or any other applicable law; (d) you have not been convicted of, and are not facing a pending charge for, a sexual offence, an offence of violence against a person, or an offence involving a child; and (e) you have not previously been removed or banned from Sakura. We may ask for proof of age or identity at any time. If we learn that a user is under 18, we will delete the account immediately. You must not allow anyone under 18 to use your account.`],
+['3. Your account',`You must give accurate, current and complete information and keep it up to date. Your profile must be about you and use your own photos. You may hold only one account. You are responsible for keeping your login details secure and for everything that happens under your account. Tell us at once if you suspect unauthorised access. We may send you emails that are needed to run your account, such as confirmation and password-reset messages.`],
+['4. Rules of conduct',`You agree that you will not, and will not help anyone to: (a) create a fake, misleading or impersonating profile, or use another person's photos or identity; (b) harass, bully, threaten, stalk, abuse, discriminate against or pressure any person; (c) post or send hate speech, content that promotes violence, or content that is unlawful, defamatory or obscene; (d) post or send nudity, sexually explicit material, intimate images of any person without their clear consent, or any sexual content involving anyone under 18; (e) ask for or send money, gifts, gift cards, cryptocurrency or financial details, or run any scam, fraud, romance scam or pyramid scheme; (f) advertise, sell, promote or solicit any goods or services, including escort or sexual services, or recruit for any business or cause; (g) put phone numbers, social media handles, email addresses or other contact details in your name, bio or other profile information (you may share contact details privately in chat, subject to section 6); (h) collect, copy, scrape or harvest information about other users, or use bots or automated tools; (i) interfere with or attempt to break the security of the Service, or get around blocks, bans or limits, including by creating new accounts; (j) share another person's private information or messages without their consent; or (k) use the Service for any unlawful purpose or in breach of any applicable law.`],
+['5. Your content',`You keep ownership of the photos, text and other material you provide ("Your Content"). You give us a worldwide, non-exclusive, royalty-free licence to host, store, reproduce, adapt for display (for example, resizing photos) and show Your Content to other users, and to operate, secure and improve the Service. This licence ends when you delete the content or your account, except for copies of messages that other users have already received and technical copies that remain for a short period in backups or logs. You confirm that you own or have the right to use Your Content and that it does not break these Terms, any law, or the rights of any person. We may remove any content if we believe it breaches these Terms or is harmful.`],
+['6. Chat and sharing contact details',`Sakura lets matched users send each other private messages. You may choose to share contact details, including a phone number, in chat. Doing so is entirely your choice and your risk. Once you share contact details, the conversation may move outside Sakura, where our blocking, reporting and moderation tools do not apply. Never share financial information, identity documents, passwords or your home address with someone you have not met and come to trust. We do not routinely read private messages, but we may access and review messages and other information where a user reports a concern, where we reasonably suspect a breach of these Terms or unlawful activity, or where the law requires it.`],
+['7. Safety and meeting people',`We do not run criminal, identity or background checks on users, and we do not guarantee that any user is who they say they are, even if they have a photo or a verification badge. You are solely responsible for your interactions with other users, online and offline. When meeting someone in person, meet in a public place, tell a friend or family member where you are going, and arrange your own transport. We are not responsible for the conduct of any user, online or offline. If you are in danger, contact the Zambia Police Service or other emergency services immediately.`],
+['8. Blocking, reporting and enforcement',`You can block, unmatch and report other users at any time. We may review reports and take any action we consider appropriate, including removing content, warning, restricting, suspending or permanently ending accounts, and refusing future access, with or without notice. We may keep and share information with the police, regulators or courts where the law requires it, or where we believe it is necessary to protect any person's safety, prevent crime or protect our rights. We are not obliged to monitor the Service or to act on every report.`],
+['9. Availability and changes',`The Service is provided on an "as available" basis and may still be under development. We may add, change, suspend or remove features at any time. We do not promise that the Service will be uninterrupted, secure or free of errors, or that content will never be lost. Do not rely on Sakura as the only place where information that is important to you is kept.`],
+['10. Paid features',`Sakura is currently free to use. If we introduce paid features, the price, billing terms and refund terms will be shown to you before you buy, and they will form part of this agreement for that purchase.`],
+['11. Our rights',`The Sakura name, logo, design, software and all content we create belong to us or our licensors and are protected by law. We give you a personal, limited, non-exclusive, non-transferable and revocable permission to use the Service for its intended purpose while you comply with these Terms. You must not copy, modify, reverse engineer, resell or exploit any part of the Service except as the law allows.`],
+['12. Disclaimers',`To the fullest extent permitted by law, the Service and all content are provided "as is" and "as available", without warranties of any kind, express or implied, including fitness for a particular purpose, accuracy and non-infringement. We do not promise that you will find a match, a friend or a relationship. We do not endorse any user or any user content, and we are not responsible for what users say or do.`],
+['13. Limits on our liability',`To the fullest extent permitted by law, we and our owners, officers, employees and partners are not liable for any indirect, incidental, special, consequential or punitive loss, for loss of data, profit, reputation or opportunity, or for any loss or harm arising from the acts or omissions of any user, from meetings or dealings between users, or from content posted by users. Our total liability to you for all claims relating to the Service will not exceed ZMW 500. Nothing in these Terms excludes or limits any liability that cannot lawfully be excluded or limited, including liability for fraud or for death or personal injury caused by our negligence, or any consumer rights you have under Zambian law that cannot be waived.`],
+['14. Your responsibility to us',`You agree to compensate and hold harmless Sakura and its owners, officers, employees and partners against any claim, loss, liability, damage and reasonable legal cost arising from your breach of these Terms, Your Content, your unlawful conduct, or your dealings with other users.`],
+['15. Ending your account',`You may delete your account at any time in the app under You, then Delete account. Deletion permanently removes your profile, photos, likes, matches and messages from our active systems, as described in the Privacy Policy, and cannot be undone. We may suspend or end your access at any time if you breach these Terms, if the law requires it, or if we stop providing the Service. Sections that by their nature should continue, including sections 5, 12, 13, 14 and 18, continue after termination.`],
+['16. Changes to these Terms',`We may update these Terms from time to time. If we make a material change, we will ask you to review and accept the new version in the app before you continue. If you do not accept, you must stop using the Service and may delete your account. The version of the Terms you accepted and the time you accepted it are recorded against your account.`],
+['17. Complaints',`If you have a complaint, please contact us first at ${CONTACT} so that we can try to resolve it informally within 30 days. Nothing in this section stops you from going to a court or to the relevant regulator, including the Data Protection Commissioner of Zambia.`],
+['18. Governing law',`These Terms and any dispute connected with the Service are governed by the laws of the Republic of Zambia. Subject to section 17, the courts of Zambia have exclusive jurisdiction, except where the law gives you the right to bring a claim elsewhere.`],
+['19. General',`These Terms and our Privacy Policy are the entire agreement between you and us about the Service. If any part is found to be invalid or unenforceable, the rest stays in force. If we do not enforce a right, that is not a waiver of it. You may not transfer your rights under these Terms; we may transfer ours to a successor of the Service. We may give you notices in the app or by email to the address on your account.`],
+['20. Contact',`Questions about these Terms: ${CONTACT}.`]
+];
+const PRIVACY=[
+['1. Who we are',`Sakura, operated by Bernard Phiri ("we", "us"), is the data controller of the personal information described in this policy. This policy explains what information we collect, why we use it, who can see it, and your rights under the Data Protection Act, 2021 of Zambia and other applicable law. Contact: ${CONTACT}.`],
+['2. Information we collect',`Account information: your email address and a password (stored in protected form; we cannot read it), and the version of the Terms you accepted and when. Profile information you provide: display name, date of birth, gender, location (as text you type, such as your city), what you are looking for, bio and photos. Gender, and anything shown in your photos or bio, may reveal sensitive information; you choose what to provide. Activity information: who you like or pass, your matches, the messages you send and receive and whether they were read, people you block, and reports you make or that are made about you. Technical information: your IP address, browser and device type and basic usage logs, collected by our hosting and infrastructure providers to run and secure the Service. We do not currently collect your precise GPS location.`],
+['3. How we use your information',`We use it to: create and run your account; show your profile to other users and show you other users; create matches and deliver messages; send emails needed to run your account, such as confirmation and password-reset messages; keep the Service safe, including detecting fake accounts, handling reports and enforcing our Terms; comply with the law and respond to lawful requests; and fix and improve the Service. We do not sell your personal information and we do not show advertising.`],
+['4. Legal basis',`We process your information because you consent to it when you create an account and complete your profile, because it is necessary to provide the Service you asked for, because we have a legitimate interest in keeping the Service safe and secure, and because the law requires it in some cases. You may withdraw consent at any time by deleting your account, although this does not affect processing already carried out.`],
+['5. What other users can see',`Other users who are shown to you can see your display name, age (calculated from your date of birth; the date itself is not shown), gender, location text, what you are looking for, bio and photos. Users you match with can also exchange messages with you. Anything you share in a message can be saved or passed on by the other person, so share carefully. Do not put phone numbers or other contact details in your profile.`],
+['6. Who we share information with',`We share information only with: (a) service providers who help us run Sakura, including our database, authentication and file-storage provider (Supabase), our website hosting provider, and our email-delivery provider, who may process the data only on our instructions; (b) the police, courts or regulators where the law requires it or where necessary to prevent harm or crime; and (c) a successor, if the Service is transferred, who must honour this policy. We do not share your information with advertisers or data brokers.`],
+['7. Where information is stored',`Our database and photo storage are hosted with Supabase in the European Union (Ireland region). Your information may therefore be transferred to and processed outside Zambia. We take reasonable steps to make sure our providers protect it to a standard consistent with applicable law.`],
+['8. How long we keep information',`We keep your information while your account exists. When you delete your account in the app, your profile, photos, likes, matches, messages and blocks are removed from our active systems straight away. Limited residual copies may remain in provider logs or backups for a short time before they are overwritten. We may keep information for longer where the law requires it or where it is needed to deal with a legal claim or a safety investigation. Messages you sent to other users may remain with them only if they have saved them.`],
+['9. Your rights',`Subject to applicable law, you have the right to: know what information we hold about you and receive a copy; correct inaccurate information (you can edit your profile in the app); delete your information (you can delete your account in the app); object to or restrict some processing; withdraw consent; and complain to the Data Protection Commissioner of Zambia. To use a right that you cannot use in the app, contact us at ${CONTACT}. We may need to verify your identity first.`],
+['10. Security',`We use access controls, encrypted connections and other reasonable technical and organisational safeguards to protect your information. No online service is completely secure, and we cannot guarantee absolute security. If a breach affecting your personal data occurs, we will notify the Data Protection Commissioner and affected users as the law requires.`],
+['11. Children',`Sakura is for adults only. We do not knowingly collect information from anyone under 18. If we learn that we have, we will delete the account and its data. If you believe a user is under 18, please report them in the app.`],
+['12. Browser storage',`We use your browser's local storage only to keep you signed in and to remember your session and settings. We do not use advertising or tracking cookies.`],
+['13. Changes to this policy',`We may update this policy. If a change is material, we will ask you to review it in the app. The version date is shown at the top of this page.`],
+['14. Contact',`Questions or requests about your information: ${CONTACT}.`]
+];
+
+function LegalBody({start}){
+  const [doc,setDoc]=useState(start||'terms');
+  const list = doc==='terms' ? TERMS : PRIVACY;
+  return h('div',null,
+    h('div',{className:'seg'}, h('button',{type:'button',className:doc==='terms'?'on':'',onClick:()=>setDoc('terms')},'Terms of Service'), h('button',{type:'button',className:doc==='privacy'?'on':'',onClick:()=>setDoc('privacy')},'Privacy Policy')),
+    h('div',{className:'legal'}, h('div',{className:'meta'},'Version '+TERMS_VERSION+' · Last updated 20 November 2026'),
+      list.map(([t,body],i)=>h('div',{key:doc+i}, h('h4',null,t), h('p',null,body)))));
+}
+function LegalCard({onBack}){
+  return h('div',{className:'card'}, h(Logo), h('div',{className:'sub'},'Please read before you continue.'), h(LegalBody), h('button',{className:'btn',style:{marginTop:14},onClick:onBack},'Back'));
+}
+
 function LoginView({go, route, prefillEmail, notice}){
+  const [legal,setLegal]=useState(false);
   const [email,setEmail]=useState(prefillEmail||'');
   const [pw,setPw]=useState('');
   const [show,setShow]=useState(false);
@@ -259,6 +327,7 @@ function LoginView({go, route, prefillEmail, notice}){
     route(data.user);
   }
 
+  if(legal) return h(LegalCard,{onBack:()=>setLegal(false)});
   return h('div',{className:'card'},
     h(Logo),
     h('div',{className:'sub'},'Welcome back. Log in to keep swiping 💗'),
@@ -276,11 +345,13 @@ function LoginView({go, route, prefillEmail, notice}){
       ),
       h('button',{className:'btn', disabled:loading}, loading?'Logging in…':'Log in')
     ),
-    h('div',{className:'foot'}, "New to Sakura? ", h('button',{className:'link',onClick:()=>go('signup')},'Create an account'))
+    h('div',{className:'foot'}, "New to Sakura? ", h('button',{className:'link',onClick:()=>go('signup')},'Create an account')),
+    h('div',{className:'foot',style:{marginTop:10}}, h('button',{className:'link',onClick:()=>setLegal(true)},'Terms and Privacy Policy'))
   );
 }
 
 function SignupView({go}){
+  const [agree,setAgree]=useState(false); const [legal,setLegal]=useState(false);
   const [email,setEmail]=useState('');
   const [pw,setPw]=useState('');
   const [pw2,setPw2]=useState('');
@@ -294,10 +365,11 @@ function SignupView({go}){
     if(!validEmail(email)){ setErr('Enter a valid email address.'); return; }
     if(pw.length<8){ setErr('Password must be at least 8 characters.'); return; }
     if(pw!==pw2){ setErr('Passwords do not match.'); return; }
+    if(!agree){ setErr('Please confirm that you are 18 or older and accept the Terms of Service and Privacy Policy.'); return; }
     setLoading(true);
     const { data, error } = await sb.auth.signUp({
       email, password: pw,
-      options: { emailRedirectTo: REDIRECT_URL }
+      options: { emailRedirectTo: REDIRECT_URL, data: { terms_version: TERMS_VERSION } }
     });
     setLoading(false);
     if(error){ setErr(error.message); return; }
@@ -307,6 +379,7 @@ function SignupView({go}){
     go('checkEmail', {email, mode:'signup'});
   }
 
+  if(legal) return h(LegalCard,{onBack:()=>setLegal(false)});
   return h('div',{className:'card'},
     h(Logo),
     h('div',{className:'sub'},'Create your account and find your match.'),
@@ -320,7 +393,9 @@ function SignupView({go}){
       h('div',{className:'field'}, h('label',null,'Confirm password'),
         h('input',{type: show?'text':'password', value:pw2, onChange:e=>setPw2(e.target.value), placeholder:'Re-enter password'})
       ),
-      h('button',{className:'btn', style:{marginTop:4}, disabled:loading}, loading?'Creating…':'Create account')
+      h('label',{className:'remember',style:{alignItems:'flex-start',margin:'4px 0 6px',lineHeight:1.4}}, h('input',{type:'checkbox',checked:agree,onChange:e=>setAgree(e.target.checked),style:{marginTop:3}}), h('span',null,'I am 18 or older and I agree to the Terms of Service and Privacy Policy.')),
+      h('button',{type:'button',className:'link',style:{marginBottom:14},onClick:()=>setLegal(true)},'More information: read the Terms and Privacy Policy'),
+      h('button',{className:'btn', disabled:loading}, loading?'Creating…':'Create account')
     ),
     h('div',{className:'foot'}, "Already on Sakura? ", h('button',{className:'link',onClick:()=>go('login',{email})},'Log in'))
   );
@@ -481,7 +556,7 @@ function ProfileForm({user, profile, title, sub, submitLabel, onDone, onCancel, 
     if(extra) row.photos = photos;
     const { error } = await sb.from('profiles').upsert(row);
     setSaving(false);
-    if(error){ setErr(error.message); return; }
+    if(error){ setErr(/PHONE_NUMBER/.test(error.message) ? 'Phone numbers cannot be put in your name or bio. You can share contact details privately in chat after you match.' : error.message); return; }
     if(extra){ const gone=(p.photos||[]).filter(u=>!photos.includes(u)).map(u=>u.split('/avatars/')[1]).filter(Boolean); if(gone.length) sb.storage.from('avatars').remove(gone); }
     onDone({...p, ...row});
   }
@@ -537,7 +612,7 @@ function Empty({title,text,children}){ return h('div',{className:'empty'}, h('b'
 function Avatar({url,name,size,onClick}){
   return h('div',{className:'mini',onClick,style:{width:size,height:size,fontSize:size*0.42,backgroundImage:url?'url('+url+')':undefined}}, url?null:(name||'?')[0]);
 }
-function ProfileSheet({p,onClose}){
+function ProfileSheet({p,onClose,onSafety}){
   const imgs=[p.avatar_url].concat(p.photos||[]).filter(Boolean);
   const [i,setI]=useState(0);
   return h('div',{className:'sheet'},
@@ -551,7 +626,10 @@ function ProfileSheet({p,onClose}){
       p.bio ? h('p',null,p.bio) : null,
       h('div',{className:'tags'}, p.looking_for ? h('span',{className:'tag'},p.looking_for) : null, p.gender ? h('span',{className:'tag'},p.gender) : null)
     ),
-    h('button',{className:'btn',onClick:onClose},'Close')
+    h('button',{className:'btn',onClick:onClose},'Close'),
+    onSafety ? h('div',{style:{display:'flex',gap:10,marginTop:10}},
+      h('button',{className:'btn ghost red',style:{flex:1},onClick:()=>onSafety('report')},'Report'),
+      h('button',{className:'btn ghost red',style:{flex:1},onClick:()=>onSafety('block')},'Block')) : null
   );
 }
 function PersonRow({p,onView,sub,children}){
@@ -562,11 +640,12 @@ function PersonRow({p,onView,sub,children}){
   );
 }
 
-function SwipeTab({active, act, setSheet}){
+function SwipeTab({active, act, setSheet, hidden}){
   const [deck,setDeck]=useState(null);
   const [dx,setDx]=useState(0); const [fly,setFly]=useState(0);
   const startX=React.useRef(null);
-  const empty = deck===null || deck.length===0;
+  const list = deck && deck.filter(c=>!(hidden||[]).includes(c.id));
+  const empty = list===null || list.length===0;
   useEffect(()=>{
     if(!active || !empty) return;
     const load=()=>sb.rpc('get_discover_profiles').then(({data})=>setDeck(data||[]));
@@ -575,7 +654,7 @@ function SwipeTab({active, act, setSheet}){
     return ()=>clearInterval(t);
   },[active,empty]);
   function decide(action){
-    const c = deck && deck[0]; if(!c || fly) return;
+    const c = list && list[0]; if(!c || fly) return;
     setFly(action==='like'?1:-1);
     setTimeout(()=>{
       act(c.id, action==='like'?'like':'pass');
@@ -587,10 +666,10 @@ function SwipeTab({active, act, setSheet}){
   function up(){
     if(startX.current===null) return; startX.current=null;
     if(dx>90) decide('like'); else if(dx<-90) decide('pass');
-    else { if(Math.abs(dx)<6) setSheet(deck[0]); setDx(0); }
+    else { if(Math.abs(dx)<6) setSheet(list[0]); setDx(0); }
   }
-  if(deck===null) return h(Empty,{title:'Finding people…',text:''});
-  const c = deck[0];
+  if(list===null) return h(Empty,{title:'Finding people…',text:''});
+  const c = list[0];
   if(!c) return h(Empty,{title:"You're all caught up",text:'No one new right now. New people show up here automatically.'},
     h('button',{className:'btn sm',style:{marginTop:10},onClick:()=>setDeck(null)},'Refresh'));
   const x = fly ? fly*480 : dx;
@@ -634,9 +713,9 @@ function NotifTab({inbox, act, openChat, setSheet, active}){
     body);
 }
 
-function ChatScreen({match, me, back, setSheet, refresh}){
+function ChatScreen({match, me, back, setSheet, refresh, onSafety, showTip, dismissTip}){
   const [msgs,setMsgs]=useState([]); const [text,setText]=useState(''); const [err,setErr]=useState('');
-  const endRef=React.useRef(null);
+  const endRef=React.useRef(null); const [menu,setMenu]=useState(false);
   async function load(){
     const { data } = await sb.from('messages').select('*').eq('match_id',match.match_id).order('created_at',{ascending:true}).limit(300);
     if(!data) return;
@@ -655,7 +734,12 @@ function ChatScreen({match, me, back, setSheet, refresh}){
     const body=text.trim(); if(!body) return;
     setText(''); setErr('');
     const { error } = await sb.from('messages').insert({match_id:match.match_id,sender_id:me.id,body});
-    if(error){ setText(body); setErr(error.message); return; }
+    if(error){
+      if(/PHONE_NUMBER/.test(error.message)) setErr('Phone numbers cannot be shared on Sakura for your safety ❤️');
+      else if(/row-level security/.test(error.message)) setErr('This chat is no longer available.');
+      else { setText(body); setErr(error.message); }
+      return;
+    }
     load(); refresh();
   }
   const lastMine=[...msgs].reverse().find(m=>m.sender_id===me.id);
@@ -663,7 +747,10 @@ function ChatScreen({match, me, back, setSheet, refresh}){
     h('div',{className:'chat-head'},
       h('button',{className:'back',onClick:back},'‹'),
       h(Avatar,{url:match.avatar_url,name:match.display_name,size:38,onClick:()=>setSheet(match)}),
-      h('b',{onClick:()=>setSheet(match),style:{cursor:'pointer'}},match.display_name)),
+      h('b',{onClick:()=>setSheet(match),style:{cursor:'pointer'}},match.display_name),
+      h('button',{className:'back',style:{marginLeft:'auto'},onClick:()=>setMenu(m=>!m),'aria-label':'More'},'⋯'),
+      menu ? h('div',{className:'menu'}, ['unmatch','block','report'].map(k=>h('button',{key:k,onClick:()=>{setMenu(false); onSafety(k,match);}},{unmatch:'Unmatch',block:'Block',report:'Report'}[k]))) : null),
+    showTip ? h('div',{className:'tipbar'}, h('div',null,h('b',null,'Staying safe'),h('div',{className:'meta'},'You can share contact details here, but never send money or share bank, ID or home-address details. Meet in public, tell a friend, and report anyone who pressures you.')), h('button',{className:'btn sm',onClick:dismissTip},'I understand')) : null,
     h('div',{className:'chat-msgs'},
       msgs.length===0 ? h(Empty,{title:'Say hi to '+match.display_name,text:'You matched. Send the first message.'}) : null,
       msgs.map(m=>h('div',{key:m.id,className:'bub '+(m.sender_id===me.id?'me':'them')}, m.body,
@@ -677,8 +764,8 @@ function ChatScreen({match, me, back, setSheet, refresh}){
   );
 }
 
-function ChatTab({inbox, me, chatWith, setChatWith, setSheet, refresh}){
-  if(chatWith) return h(ChatScreen,{match:chatWith,me,back:()=>{setChatWith(null); refresh();},setSheet,refresh});
+function ChatTab({inbox, me, chatWith, setChatWith, setSheet, refresh, onSafety, showTip, dismissTip}){
+  if(chatWith) return h(ChatScreen,{match:chatWith,me,back:()=>{setChatWith(null); refresh();},setSheet,refresh,onSafety,showTip,dismissTip});
   if(!inbox.matches.length) return h('div',{className:'main flush',style:{display:'flex'}}, h(Empty,{title:'No chats yet',text:'When you and someone like each other, you can chat here.'}));
   return h('div',{style:{padding:'8px 18px'}}, inbox.matches.map(m=>h('div',{key:m.match_id,className:'convo',onClick:()=>setChatWith(m)},
     h(Avatar,{url:m.avatar_url,name:m.display_name,size:52}),
@@ -687,7 +774,69 @@ function ChatTab({inbox, me, chatWith, setChatWith, setSheet, refresh}){
   )));
 }
 
-function YouTab({data, go}){
+const REPORT_CATS=['Fake profile','Underage user','Harassment','Scams or fraud','Asking for money','Sexual content','Inappropriate pictures','Sharing phone number','Catfishing','Identity theft'];
+
+function SafetySheet({mode, person, me, onClose, onDone}){
+  const pid = person.other_id || person.id;
+  const [cat,setCat]=useState(''); const [desc,setDesc]=useState(''); const [alsoBlock,setAlso]=useState(true);
+  const [busy,setBusy]=useState(false); const [err,setErr]=useState('');
+  async function run(){
+    setErr('');
+    let error=null;
+    if(mode==='report' && !cat){ setErr('Choose a reason.'); return; }
+    setBusy(true);
+    if(mode==='block') ({error}=await sb.rpc('block_user',{p_user:pid}));
+    else if(mode==='unmatch') ({error}=await sb.rpc('unmatch',{p_match:person.match_id}));
+    else {
+      ({error}=await sb.from('reports').insert({reporter_id:me.id,reported_id:pid,category:cat,description:desc.trim()||null}));
+      if(!error && alsoBlock) ({error}=await sb.rpc('block_user',{p_user:pid}));
+    }
+    setBusy(false);
+    if(error){ setErr(error.message); return; }
+    onDone(mode, alsoBlock);
+  }
+  const name=person.display_name||'this person';
+  const text = mode==='block' ? 'They will not be able to see or message you, and you will not see them. Your match and chat with them will be deleted.'
+    : mode==='unmatch' ? 'Your chat will be deleted and you will not see each other again.'
+    : 'Tell us what is wrong. Reports are reviewed by the Sakura team.';
+  return h('div',{className:'sheet top center',style:{justifyContent:'flex-start',paddingTop:30,textAlign:'left',alignItems:'stretch'}},
+    h('h3',{style:{fontSize:22}}, (mode==='report'?'Report ':mode==='block'?'Block ':'Unmatch ')+name+'?'),
+    h('p',{style:{color:'#D8CCF5',lineHeight:1.5,margin:'0 0 8px'}},text),
+    h(Message,{type:'err'}, err),
+    mode==='report' ? h('div',{style:{display:'flex',flexDirection:'column',gap:10}},
+      h('select',{value:cat,onChange:e=>setCat(e.target.value)}, h('option',{value:''},'Choose a reason'), REPORT_CATS.map(c=>h('option',{key:c,value:c},c))),
+      h('textarea',{value:desc,maxLength:1000,onChange:e=>setDesc(e.target.value),placeholder:'Add details (optional)'}),
+      h('label',{className:'switch',style:{color:'#D8CCF5',fontSize:14}}, 'Also block this person', h('input',{type:'checkbox',checked:alsoBlock,onChange:e=>setAlso(e.target.checked)}))) : null,
+    h('div',{style:{flex:1}}),
+    h('button',{className:'btn danger',onClick:run,disabled:busy},busy?'Please wait…':(mode==='report'?'Send report':mode==='block'?'Block':'Unmatch')),
+    h('button',{className:'btn ghost',style:{marginTop:10},onClick:onClose,disabled:busy},'Cancel')
+  );
+}
+
+function BlockedSheet({onClose, refresh}){
+  const [list,setList]=useState(null);
+  const load=()=>sb.rpc('get_blocked_users').then(({data})=>setList(data||[]));
+  useEffect(()=>{ load(); },[]);
+  async function unblock(id){ await sb.rpc('unblock_user',{p_user:id}); await load(); refresh(); }
+  return h('div',{className:'sheet top'},
+    h('h3',{style:{margin:'20px 0 12px',fontSize:22}},'Blocked users'),
+    list===null ? h('div',{className:'meta'},'Loading…')
+      : list.length ? list.map(u=>h(PersonRow,{key:u.id,p:u,sub:'Blocked '+fmtTime(u.blocked_at)}, h('button',{className:'btn sm ghost',onClick:()=>unblock(u.id)},'Unblock')))
+      : h('div',{className:'meta'},'You have not blocked anyone.'),
+    h('div',{style:{flex:1}}),
+    h('button',{className:'btn',style:{marginTop:12},onClick:onClose},'Close'));
+}
+
+function TipsSheet({onClose}){
+  const tips=['Never send money to someone you met on Sakura, however good the reason sounds.','Do not share personal details such as your home address, workplace, ID or bank information.','Meet in a public place for the first time, and tell a friend where you are going.','Keep conversations inside Sakura until you trust the person.','Be careful with anyone who rushes you, asks for money, or will not video call.','Report or block anyone who makes you uncomfortable. It takes a few seconds.'];
+  return h('div',{className:'sheet top'},
+    h('h3',{style:{margin:'20px 0 12px',fontSize:22}},'Safety tips'),
+    tips.map((t,i)=>h('div',{key:i,className:'you-row'},t)),
+    h('div',{style:{flex:1}}),
+    h('button',{className:'btn',style:{marginTop:12},onClick:onClose},'Close'));
+}
+
+function YouTab({data, go, openBlocked, openTips, openLegal}){
   const p = data.profile||{}; const age = ageFrom(p.birthday);
   const photoCount=(p.photos||[]).length; const missing=photoCount<4;
   async function logout(){ await sb.auth.signOut(); go('login'); }
@@ -697,6 +846,9 @@ function YouTab({data, go}){
     h('div',{className:'you-row'}, 'Looking for: '+(p.looking_for||'Not set')),
     missing ? h('div',{className:'you-row'}, 'Photos: '+(1+photoCount)+' of 5. Add '+(4-photoCount)+' more in Edit profile so people can see more of you.') : null,
     h('button',{className:'btn',style:{position:'relative'},onClick:()=>go('editProfile',{...data,focus:missing})}, 'Edit profile', missing ? h('i',{className:'badge dot',style:{top:8,right:10}}) : null),
+    h('button',{className:'btn ghost',style:{marginTop:10},onClick:openBlocked},'Blocked users'),
+    h('button',{className:'btn ghost',style:{marginTop:10},onClick:openTips},'Safety tips'),
+    h('button',{className:'btn ghost',style:{marginTop:10},onClick:openLegal},'Terms and Privacy Policy'),
     h('button',{className:'btn ghost',style:{marginTop:10},onClick:()=>go('home',data)},'Back to welcome'),
     h('button',{className:'btn ghost',style:{marginTop:10},onClick:logout},'Log out'),
     h('button',{className:'btn ghost red',style:{marginTop:10},onClick:()=>go('deleteAccount',data)},'Delete account')
@@ -710,11 +862,16 @@ function MainApp({data, go}){
   const [seen,setSeen]=useState(new Date((data.profile && data.profile.notif_seen_at) || 0).getTime());
   const [chatWith,setChatWith]=useState(null);
   const [sheet,setSheet]=useState(null); const [pop,setPop]=useState(null);
+  const [safety,setSafety]=useState(null); const [showBlocked,setShowBlocked]=useState(false); const [showTips,setShowTips]=useState(false); const [hidden,setHidden]=useState([]);
+  const [showLegal,setShowLegal]=useState(false); const [tipSeen,setTipSeen]=useState(!!(data.profile&&data.profile.chat_tip_seen));
+  function dismissTip(){ setTipSeen(true); sb.from('profiles').update({chat_tip_seen:true}).eq('id',me.id); }
+  const inboxRef=React.useRef(inbox); inboxRef.current=inbox;
   useEffect(()=>{ document.body.classList.add('app-mode'); return ()=>document.body.classList.remove('app-mode'); },[]);
 
   const refresh = React.useCallback(async ()=>{
     const [l,m,s] = await Promise.all([sb.rpc('get_likes_received'), sb.rpc('get_my_matches'), sb.rpc('get_suggestions')]);
-    const st = {likes:l.data||[], matches:m.data||[], sugg:s.data||[]};
+    const prev = inboxRef.current;
+    const st = {likes:l.error?prev.likes:(l.data||[]), matches:m.error?prev.matches:(m.data||[]), sugg:s.error?prev.sugg:(s.data||[])};
     setInbox(st); return st;
   },[]);
   useEffect(()=>{
@@ -743,25 +900,61 @@ function MainApp({data, go}){
     }
   },[tab,unseen]);
   useEffect(()=>{ if(tab==='notif' || tab==='chat') refresh(); },[tab]);
+  useEffect(()=>{ if(chatWith && !inbox.matches.some(m=>m.match_id===chatWith.match_id)) setChatWith(null); },[inbox]);
+  function safetyDone(mode, alsoBlock){
+    const person=safety.person; const pid=person.other_id||person.id;
+    setSafety(null); setSheet(null);
+    if(mode!=='report' || alsoBlock) setHidden(h0=>[...h0,pid]);
+    if(chatWith && chatWith.other_id===pid && (mode!=='report' || alsoBlock)) setChatWith(null);
+    refresh();
+  }
   function openChat(m){ setChatWith(m); setTab('chat'); }
 
   const tabs=[['swipe','🔥','Swiping',0],['notif','🔔','Notifications',tab==='notif'?0:unseen],['chat','💬','Chat',unread],['you','👤','You',0,((data.profile&&data.profile.photos)||[]).length<4]];
   const pane=(id,child,flush)=>h('div',{className:'main'+(flush?' flush':''),style:{display: tab===id?'flex':'none'}}, child);
   return h('div',{className:'shell'},
     h('div',{className:'top'},'🌸 Sakura'),
-    pane('swipe', h(SwipeTab,{active:tab==='swipe',act,setSheet})),
+    pane('swipe', h(SwipeTab,{active:tab==='swipe',act,setSheet,hidden})),
     pane('notif', h(NotifTab,{inbox,act,openChat,setSheet,active:tab==='notif'})),
-    pane('chat', h(ChatTab,{inbox,me,chatWith,setChatWith,setSheet,refresh}), !!chatWith),
-    pane('you', h(YouTab,{data,go})),
+    pane('chat', h(ChatTab,{inbox,me,chatWith,setChatWith,setSheet,refresh,onSafety:(k,p)=>setSafety({mode:k,person:p}),showTip:!tipSeen,dismissTip}), !!chatWith),
+    pane('you', h(YouTab,{data,go,openBlocked:()=>setShowBlocked(true),openTips:()=>setShowTips(true),openLegal:()=>setShowLegal(true)})),
     h('div',{className:'nav'}, tabs.map(([id,icon,label,n,dot])=>h('button',{key:id,className:tab===id?'on':'',onClick:()=>setTab(id)},
       h('span',null,icon,n>0?h('i',{className:'badge'},n>99?'99+':n):(dot?h('i',{className:'badge dot'}):null)), label))),
-    sheet ? h(ProfileSheet,{p:sheet,onClose:()=>setSheet(null)}) : null,
+    sheet ? h(ProfileSheet,{p:sheet,onClose:()=>setSheet(null),onSafety:(k)=>setSafety({mode:k,person:sheet})}) : null,
     pop ? h('div',{className:'sheet center'},
       h('h2',null,"It's a match!"),
       h(Avatar,{url:pop.avatar_url,name:pop.display_name,size:110}),
       h('p',null,'You and '+pop.display_name+' liked each other. You are now friends.'),
       h('button',{className:'btn',onClick:()=>{setPop(null); openChat(pop);}},'Start chatting'),
-      h('button',{className:'btn ghost',onClick:()=>setPop(null)},'Keep swiping')) : null
+      h('button',{className:'btn ghost',onClick:()=>setPop(null)},'Keep swiping')) : null,
+    showBlocked ? h(BlockedSheet,{onClose:()=>setShowBlocked(false),refresh}) : null,
+    showTips ? h(TipsSheet,{onClose:()=>setShowTips(false)}) : null,
+    showLegal ? h('div',{className:'sheet top'}, h('h3',{style:{margin:'20px 0 12px',fontSize:22}},'Terms and Privacy'), h(LegalBody), h('div',{style:{flex:1}}), h('button',{className:'btn',style:{marginTop:12},onClick:()=>setShowLegal(false)},'Close')) : null,
+    safety ? h(SafetySheet,{mode:safety.mode,person:safety.person,me,onClose:()=>setSafety(null),onDone:safetyDone}) : null
+  );
+}
+
+function AcceptTermsView({data, route, go}){
+  const [agree,setAgree]=useState(false); const [legal,setLegal]=useState(false); const [err,setErr]=useState(''); const [busy,setBusy]=useState(false);
+  async function accept(){
+    setErr('');
+    if(!agree){ setErr('Please tick the box to continue.'); return; }
+    setBusy(true);
+    const { error } = await sb.rpc('accept_terms',{p_version:TERMS_VERSION});
+    setBusy(false);
+    if(error){ setErr(error.message); return; }
+    route(data.user);
+  }
+  async function logout(){ await sb.auth.signOut(); go('login'); }
+  if(legal) return h(LegalCard,{onBack:()=>setLegal(false)});
+  return h('div',{className:'card'},
+    h(Logo),
+    h('div',{className:'sub'},'Before you continue, please review and accept our Terms of Service and Privacy Policy.'),
+    h(Message,{type:'err'}, err),
+    h('label',{className:'remember',style:{alignItems:'flex-start',margin:'4px 0 6px',lineHeight:1.4}}, h('input',{type:'checkbox',checked:agree,onChange:e=>setAgree(e.target.checked),style:{marginTop:3}}), h('span',null,'I am 18 or older and I agree to the Terms of Service and Privacy Policy.')),
+    h('button',{type:'button',className:'link',style:{marginBottom:14},onClick:()=>setLegal(true)},'More information: read the Terms and Privacy Policy'),
+    h('button',{className:'btn',onClick:accept,disabled:busy},busy?'Saving…':'Accept and continue'),
+    h('div',{className:'foot'}, h('button',{className:'link',onClick:logout},'Log out'))
   );
 }
 
@@ -825,6 +1018,7 @@ function App(){
     const pd = Number(localStorage.getItem('sakura_pending_delete')||0);
     if(FROM_LINK && pd && Date.now()-pd < 3600e3){ go('confirmDelete',{user}); return; }
     const { data:row } = await sb.from('profiles').select('*').eq('id', user.id).maybeSingle();
+    if(row && row.terms_version !== TERMS_VERSION){ go('acceptTerms',{user, profile:row}); return; }
     go(isComplete(row) ? 'home' : 'onboarding', { user, profile: row || {} });
   }
 
@@ -852,6 +1046,7 @@ function App(){
   if(view==='editProfile') return h(ProfileForm,{user:data.user, profile:data.profile, sub:'Update your profile details.', submitLabel:'Save changes', extra:true, focus:data.focus, onDone:(row)=>go('main',{user:data.user, profile:row, tab:'you'}), onCancel:()=>go('main',{...data,tab:'you'})});
   if(view==='deleteAccount') return h(DeleteRequestView,{data,go});
   if(view==='confirmDelete') return h(ConfirmDeleteView,{data,go});
+  if(view==='acceptTerms') return h(AcceptTermsView,{data,route,go});
   if(view==='main') return h(MainApp,{data,go});
   if(view==='home') return h(HomeView,{data,go});
   return h(LoginView,{go, route, prefillEmail:data.email, notice:data.notice});
