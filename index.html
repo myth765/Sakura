@@ -211,6 +211,11 @@
   .tipbar{display:flex; gap:10px; align-items:center; background:#F3EEFF; border-bottom:1px solid #E1DEEC; padding:10px 14px; font-size:13.5px;}
   .pcard h3{color:#fff;} .pcard .meta{color:#EDE7FF;} .pcard .tag{background:rgba(255,255,255,.22); color:#fff;}
   .top{border-bottom:1px solid #EEEDF4;}
+  .top{position:relative;}
+  .fbtn{position:absolute; right:14px; background:#F3EEFF; color:#5B3DDB; border:none; border-radius:999px; padding:7px 12px; font-size:12.5px; font-family:'Inter',sans-serif; font-weight:600; cursor:pointer;}
+  .chips{display:flex; flex-wrap:wrap; gap:8px; margin:6px 0 10px;}
+  .chip{border:1.5px solid #DCD8EA; background:#fff; color:#1F1B2E; border-radius:999px; padding:8px 14px; font-family:inherit; font-size:13.5px; cursor:pointer;}
+  .chip.on{background:linear-gradient(135deg,#9B5CFF,#6D3BD2); color:#fff; border-color:transparent;}
   .shell .btn{background:linear-gradient(135deg,#9B5CFF,#6D3BD2); box-shadow:none;}
   .shell .btn.ghost{background:none; border:1.5px solid #DCD8EA; color:#6D3BD2;}
 </style>
@@ -251,7 +256,7 @@ const BLOSSOM_SVG = '<svg width="28" height="28" viewBox="0 0 240 240" xmlns="ht
   + '</g><circle cx="120" cy="120" r="28" fill="#6D3BD2"/></svg>';
 
 function Logo(){
-  return h('div',{className:'mark'}, h('span',{className:'bud', dangerouslySetInnerHTML:{__html:BLOSSOM_SVG}}), h('span',null,'Sakura'), h('span',{style:{marginLeft:'auto',fontSize:10,opacity:.5}},'v11'));
+  return h('div',{className:'mark'}, h('span',{className:'bud', dangerouslySetInnerHTML:{__html:BLOSSOM_SVG}}), h('span',null,'Sakura'), h('span',{style:{marginLeft:'auto',fontSize:10,opacity:.5}},'v12'));
 }
 function Message({type,children}){
   if(!children) return null;
@@ -490,6 +495,13 @@ function ResetPasswordView({go, route}){
 }
 
 const LOOKING = ['Friendship','Serious relationship','Casual dating','Friendship or relationship'];
+const LOCATIONS = ['Lusaka','Kitwe','Ndola','Kabwe','Chingola','Mufulira','Livingstone','Luanshya','Kasama','Chipata','Solwezi','Mongu','Kafue','Choma','Mansa','Mazabuka','Kalulushi','Chililabombwe','Kapiri Mposhi','Monze','Petauke','Mpika','Chinsali','Mumbwa','Siavonga','Chirundu','Nakonde','Samfya','Kawambwa','Sesheke','Zambezi','Kabompo','Lundazi','Katete'];
+const BANDS = [[18,22],[23,27],[28,32],[33,37],[38,42],[43,47],[48,120]];
+const bandLabel = (b)=> b[1]>=100 ? b[0]+'+' : b[0]+'-'+b[1];
+function filterArgs(f){
+  const bs=((f&&f.bands)||[]).map(i=>BANDS[i]).filter(Boolean);
+  return { p_age_min: bs.length?bs.map(b=>b[0]):null, p_age_max: bs.length?bs.map(b=>b[1]):null, p_locations:(f&&f.towns&&f.towns.length)?f.towns:null };
+}
 function normGender(g){ const s=(g||'').trim().toLowerCase(); if(['man','male','m','boy'].includes(s)) return 'Man'; if(['woman','female','f','girl'].includes(s)) return 'Woman'; return ''; }
 function isComplete(p){ return !!(p && p.display_name && p.birthday && p.location && p.looking_for && normGender(p.gender)); }
 function ageFrom(b){
@@ -520,7 +532,10 @@ function ProfileForm({user, profile, title, sub, submitLabel, onDone, onCancel, 
   const [name,setName]=useState(p.display_name||''); const [birthday,setBirthday]=useState(p.birthday||'');
   const [gender,setGender]=useState(normGender(p.gender)); const [orientation,setOrientation]=useState(p.orientation||'');
   const [bio,setBio]=useState(p.bio||'');
-  const [location,setLocation]=useState(p.location||''); const [lookingFor,setLookingFor]=useState(p.looking_for||'');
+  const matchTown=(v)=>LOCATIONS.find(t=>t.toLowerCase()===(v||'').trim().toLowerCase())||'';
+  const [locChoice,setLocChoice]=useState(matchTown(p.location) || (p.location ? 'Other' : ''));
+  const [locOther,setLocOther]=useState(matchTown(p.location) ? '' : (p.location||''));
+  const location = locChoice==='Other' ? locOther : locChoice; const [lookingFor,setLookingFor]=useState(p.looking_for||'');
   const [avatar,setAvatar]=useState(p.avatar_url||''); const [uploading,setUploading]=useState(false);
   const [photos,setPhotos]=useState(p.photos||[]); const galRef=React.useRef(null);
   useEffect(()=>{ if(extra && focus && galRef.current) galRef.current.scrollIntoView({block:'center'}); },[]);
@@ -558,7 +573,7 @@ function ProfileForm({user, profile, title, sub, submitLabel, onDone, onCancel, 
     if(!birthday){ setErr('Enter your birthday.'); return; }
     if(ageFrom(birthday) < 18){ setErr('You must be 18 or older to use Sakura.'); return; }
     if(!gender){ setErr('Choose your gender.'); return; }
-    if(!location.trim()){ setErr('Enter your city or area.'); return; }
+    if(!location.trim()){ setErr('Choose your town, or choose Other and type it.'); return; }
     if(!lookingFor){ setErr('Choose what you are looking for.'); return; }
     setSaving(true);
     const row = { id:user.id, email:user.email, display_name:name.trim(), birthday, gender, orientation, bio, location:location.trim(), looking_for:lookingFor, avatar_url:avatar||null, updated_at:new Date().toISOString() };
@@ -589,7 +604,9 @@ function ProfileForm({user, profile, title, sub, submitLabel, onDone, onCancel, 
       h('div',{className:'field'}, h('label',null,'Birthday'), h('input',{type:'date',value:birthday,onChange:e=>setBirthday(e.target.value)})),
       h('div',{className:'field'}, h('label',null,'Gender'), h('select',{value:gender,onChange:e=>setGender(e.target.value)}, h('option',{value:''},'Choose one'), h('option',{value:'Man'},'Man'), h('option',{value:'Woman'},'Woman'))),
       h('div',{className:'field'}, h('label',null,'Sexual orientation'), h('input',{type:'text',value:orientation,onChange:e=>setOrientation(e.target.value),placeholder:'e.g. Straight, Gay, Bisexual'})),
-      h('div',{className:'field'}, h('label',null,'Location'), h('input',{type:'text',value:location,onChange:e=>setLocation(e.target.value),placeholder:'City or area, e.g. Lusaka, Zambia'})),
+      h('div',{className:'field'}, h('label',null,'Location'),
+        h('select',{value:locChoice,onChange:e=>setLocChoice(e.target.value)}, h('option',{value:''},'Choose your town'), LOCATIONS.map(t=>h('option',{key:t,value:t},t)), h('option',{value:'Other'},'Other (type it in)')),
+        locChoice==='Other' ? h('input',{type:'text',style:{marginTop:8},value:locOther,onChange:e=>setLocOther(e.target.value),placeholder:'Type your town or area'}) : null),
       h('div',{className:'field'}, h('label',null,'What are you looking for?'), h('select',{value:lookingFor,onChange:e=>setLookingFor(e.target.value)}, h('option',{value:''},'Choose one'), LOOKING.map(o=>h('option',{key:o,value:o},o)))),
       h('div',{className:'field'}, h('label',null,'Bio'), h('input',{type:'text',value:bio,onChange:e=>setBio(e.target.value),placeholder:'A little about you'})),
       h('button',{className:'btn', disabled:saving}, saving?'Saving…':submitLabel)
@@ -649,7 +666,8 @@ function PersonRow({p,onView,sub,children}){
   );
 }
 
-function SwipeTab({active, act, setSheet, hidden}){
+function SwipeTab({active, act, setSheet, hidden, filters}){
+  const fkey = JSON.stringify(filters||{});
   const [deck,setDeck]=useState(null);
   const [dx,setDx]=useState(0); const [fly,setFly]=useState(0);
   const startX=React.useRef(null);
@@ -657,11 +675,12 @@ function SwipeTab({active, act, setSheet, hidden}){
   const empty = list===null || list.length===0;
   useEffect(()=>{
     if(!active || !empty) return;
-    const load=()=>sb.rpc('get_discover_profiles').then(({data})=>setDeck(data||[]));
+    const load=()=>sb.rpc('get_discover_profiles', filterArgs(filters)).then(({data})=>setDeck(data||[]));
     load();
     const t=setInterval(load,15000);
     return ()=>clearInterval(t);
-  },[active,empty]);
+  },[active,empty,fkey]);
+  useEffect(()=>{ setDeck(null); },[fkey]);
   function decide(action){
     const c = list && list[0]; if(!c || fly) return;
     setFly(action==='like'?1:-1);
@@ -868,6 +887,25 @@ function YouTab({data, go, openBlocked, openTips, openLegal}){
   );
 }
 
+function FilterSheet({filters, onApply, onClose}){
+  const [bands,setBands]=useState(filters.bands||[]); const [towns,setTowns]=useState(filters.towns||[]);
+  const toggle=(i)=>setBands(b=>b.includes(i)?b.filter(x=>x!==i):[...b,i]);
+  return h('div',{className:'sheet top',style:{paddingTop:20}},
+    h('h3',{style:{fontSize:22,margin:'0 0 4px'}},'Filters'),
+    h('div',{className:'meta',style:{marginBottom:10}},'Free for everyone. Leave a filter empty to see everyone.'),
+    h('div',{className:'sec'},'Age range'),
+    h('div',{className:'chips'}, BANDS.map((b,i)=>h('button',{key:i,type:'button',className:'chip'+(bands.includes(i)?' on':''),onClick:()=>toggle(i)},bandLabel(b)))),
+    h('div',{className:'sec'},'Location'),
+    h('div',{className:'chips'}, towns.map(t=>h('button',{key:t,type:'button',className:'chip on',onClick:()=>setTowns(x=>x.filter(y=>y!==t))},t+' ×'))),
+    h('select',{value:'',onChange:e=>{ const v=e.target.value; if(v) setTowns(x=>x.includes(v)?x:[...x,v]); }},
+      h('option',{value:''},towns.length?'Add another town':'Choose a town'), LOCATIONS.filter(t=>!towns.includes(t)).map(t=>h('option',{key:t,value:t},t))),
+    h('div',{className:'meta',style:{marginTop:8}},'People who chose Other for their location only appear when no town is selected.'),
+    h('div',{style:{flex:1}}),
+    h('button',{className:'btn',style:{marginTop:14},onClick:()=>onApply({bands,towns})},'Apply'),
+    h('button',{className:'btn ghost',style:{marginTop:10},onClick:()=>{setBands([]);setTowns([]);}},'Clear all'),
+    h('button',{className:'btn ghost',style:{marginTop:10},onClick:onClose},'Cancel'));
+}
+
 function MainApp({data, go}){
   const me = data.user;
   const [tab,setTab]=useState(data.tab||'swipe');
@@ -876,13 +914,16 @@ function MainApp({data, go}){
   const [chatWith,setChatWith]=useState(null);
   const [sheet,setSheet]=useState(null); const [pop,setPop]=useState(null);
   const [safety,setSafety]=useState(null); const [showBlocked,setShowBlocked]=useState(false); const [showTips,setShowTips]=useState(false); const [hidden,setHidden]=useState([]);
+  const [filters,setFilters]=useState({bands:(data.profile&&data.profile.filter_age_bands)||[], towns:(data.profile&&data.profile.filter_locations)||[]});
+  const [showFilters,setShowFilters]=useState(false);
+  const filtersRef=React.useRef(filters); filtersRef.current=filters;
   const [showLegal,setShowLegal]=useState(false); const [tipSeen,setTipSeen]=useState(!!(data.profile&&data.profile.chat_tip_seen));
   function dismissTip(){ setTipSeen(true); sb.from('profiles').update({chat_tip_seen:true}).eq('id',me.id); }
   const inboxRef=React.useRef(inbox); inboxRef.current=inbox;
   useEffect(()=>{ document.body.classList.add('app-mode'); return ()=>document.body.classList.remove('app-mode'); },[]);
 
   const refresh = React.useCallback(async ()=>{
-    const [l,m,s] = await Promise.all([sb.rpc('get_likes_received'), sb.rpc('get_my_matches'), sb.rpc('get_suggestions')]);
+    const [l,m,s] = await Promise.all([sb.rpc('get_likes_received'), sb.rpc('get_my_matches'), sb.rpc('get_suggestions', filterArgs(filtersRef.current))]);
     const prev = inboxRef.current;
     const st = {likes:l.error?prev.likes:(l.data||[]), matches:m.error?prev.matches:(m.data||[]), sugg:s.error?prev.sugg:(s.data||[])};
     setInbox(st); return st;
@@ -921,13 +962,18 @@ function MainApp({data, go}){
     if(chatWith && chatWith.other_id===pid && (mode!=='report' || alsoBlock)) setChatWith(null);
     refresh();
   }
+  function applyFilters(f){
+    filtersRef.current=f; setFilters(f); setShowFilters(false);
+    sb.from('profiles').update({filter_age_bands:f.bands,filter_locations:f.towns}).eq('id',me.id);
+    refresh();
+  }
   function openChat(m){ setChatWith(m); setTab('chat'); }
 
   const tabs=[['swipe','🔥','Swiping',0],['notif','🔔','Notifications',tab==='notif'?0:unseen],['chat','💬','Chat',unread],['you','👤','You',0,((data.profile&&data.profile.photos)||[]).length<4]];
   const pane=(id,child,flush)=>h('div',{className:'main'+(flush?' flush':''),style:{display: tab===id?'flex':'none'}}, child);
   return h('div',{className:'shell'},
-    h('div',{className:'top'},'🌸 Sakura'),
-    pane('swipe', h(SwipeTab,{active:tab==='swipe',act,setSheet,hidden})),
+    h('div',{className:'top'},'🌸 Sakura', (tab==='swipe'||tab==='notif') ? h('button',{className:'fbtn',onClick:()=>setShowFilters(true)},'Filters'+((filters.bands.length+filters.towns.length)?' ('+(filters.bands.length+filters.towns.length)+')':'')) : null),
+    pane('swipe', h(SwipeTab,{active:tab==='swipe',act,setSheet,hidden,filters})),
     pane('notif', h(NotifTab,{inbox,act,openChat,setSheet,active:tab==='notif'})),
     pane('chat', h(ChatTab,{inbox,me,chatWith,setChatWith,setSheet,refresh,onSafety:(k,p)=>setSafety({mode:k,person:p}),showTip:!tipSeen,dismissTip}), !!chatWith),
     pane('you', h(YouTab,{data,go,openBlocked:()=>setShowBlocked(true),openTips:()=>setShowTips(true),openLegal:()=>setShowLegal(true)})),
@@ -942,6 +988,7 @@ function MainApp({data, go}){
       h('button',{className:'btn ghost',onClick:()=>setPop(null)},'Keep swiping')) : null,
     showBlocked ? h(BlockedSheet,{onClose:()=>setShowBlocked(false),refresh}) : null,
     showTips ? h(TipsSheet,{onClose:()=>setShowTips(false)}) : null,
+    showFilters ? h(FilterSheet,{filters,onApply:applyFilters,onClose:()=>setShowFilters(false)}) : null,
     showLegal ? h('div',{className:'sheet top'}, h('h3',{style:{margin:'20px 0 12px',fontSize:22}},'Terms and Privacy'), h(LegalBody), h('div',{style:{flex:1}}), h('button',{className:'btn',style:{marginTop:12},onClick:()=>setShowLegal(false)},'Close')) : null,
     safety ? h(SafetySheet,{mode:safety.mode,person:safety.person,me,onClose:()=>setSafety(null),onDone:safetyDone}) : null
   );
