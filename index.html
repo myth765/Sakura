@@ -256,14 +256,14 @@ const BLOSSOM_SVG = '<svg width="28" height="28" viewBox="0 0 240 240" xmlns="ht
   + '</g><circle cx="120" cy="120" r="28" fill="#6D3BD2"/></svg>';
 
 function Logo(){
-  return h('div',{className:'mark'}, h('span',{className:'bud', dangerouslySetInnerHTML:{__html:BLOSSOM_SVG}}), h('span',null,'Sakura'), h('span',{style:{marginLeft:'auto',fontSize:10,opacity:.5}},'v12'));
+  return h('div',{className:'mark'}, h('span',{className:'bud', dangerouslySetInnerHTML:{__html:BLOSSOM_SVG}}), h('span',null,'Sakura'), h('span',{style:{marginLeft:'auto',fontSize:10,opacity:.5}},'v13'));
 }
 function Message({type,children}){
   if(!children) return null;
   return h('div',{className:'msg '+type}, children);
 }
 
-const TERMS_VERSION='2026-11-20';
+const TERMS_VERSION='2026-11-22';
 const CONTACT='phiribernard765@gmail.com';
 const TERMS=[
 ['1. About these Terms',`These Terms of Service ("Terms") are a legal agreement between you and Bernard Phiri, the operator of Sakura ("Sakura", "we", "us" or "our"). They apply to your use of the Sakura website and application and all related services (the "Service"). By creating an account, ticking the agreement box, or using the Service, you confirm that you have read, understood and agree to be bound by these Terms and our Privacy Policy. If you do not agree, do not use the Service.`],
@@ -273,7 +273,7 @@ const TERMS=[
 ['5. Your content',`You keep ownership of the photos, text and other material you provide ("Your Content"). You give us a worldwide, non-exclusive, royalty-free licence to host, store, reproduce, adapt for display (for example, resizing photos) and show Your Content to other users, and to operate, secure and improve the Service. This licence ends when you delete the content or your account, except for copies of messages that other users have already received and technical copies that remain for a short period in backups or logs. You confirm that you own or have the right to use Your Content and that it does not break these Terms, any law, or the rights of any person. We may remove any content if we believe it breaches these Terms or is harmful.`],
 ['6. Chat and sharing contact details',`Sakura lets matched users send each other private messages. You may choose to share contact details, including a phone number, in chat. Doing so is entirely your choice and your risk. Once you share contact details, the conversation may move outside Sakura, where our blocking, reporting and moderation tools do not apply. Never share financial information, identity documents, passwords or your home address with someone you have not met and come to trust. We do not routinely read private messages, but we may access and review messages and other information where a user reports a concern, where we reasonably suspect a breach of these Terms or unlawful activity, or where the law requires it.`],
 ['7. Safety and meeting people',`We do not run criminal, identity or background checks on users, and we do not guarantee that any user is who they say they are, even if they have a photo or a verification badge. You are solely responsible for your interactions with other users, online and offline. When meeting someone in person, meet in a public place, tell a friend or family member where you are going, and arrange your own transport. We are not responsible for the conduct of any user, online or offline. If you are in danger, contact the Zambia Police Service or other emergency services immediately.`],
-['8. Blocking, reporting and enforcement',`You can block, unmatch and report other users at any time. We may review reports and take any action we consider appropriate, including removing content, warning, restricting, suspending or permanently ending accounts, and refusing future access, with or without notice. We may keep and share information with the police, regulators or courts where the law requires it, or where we believe it is necessary to protect any person's safety, prevent crime or protect our rights. We are not obliged to monitor the Service or to act on every report.`],
+['8. Blocking, reporting and enforcement',`You can block, unmatch and report other users at any time. We may review reports and take any action we consider appropriate, including removing content, warning, restricting, suspending or permanently ending accounts, and refusing future access, with or without notice. We may keep and share information with the police, regulators or courts where the law requires it, or where we believe it is necessary to protect any person's safety, prevent crime or protect our rights. We are not obliged to monitor the Service or to act on every report. We may send you a warning, which you must acknowledge in the app before you continue. If we permanently ban an account for serious or repeated breaches, we keep the email address and the reason so that the person cannot register again.`],
 ['9. Availability and changes',`The Service is provided on an "as available" basis and may still be under development. We may add, change, suspend or remove features at any time. We do not promise that the Service will be uninterrupted, secure or free of errors, or that content will never be lost. Do not rely on Sakura as the only place where information that is important to you is kept.`],
 ['10. Paid features',`Sakura is currently free to use. If we introduce paid features, the price, billing terms and refund terms will be shown to you before you buy, and they will form part of this agreement for that purchase.`],
 ['11. Our rights',`The Sakura name, logo, design, software and all content we create belong to us or our licensors and are protected by law. We give you a personal, limited, non-exclusive, non-transferable and revocable permission to use the Service for its intended purpose while you comply with these Terms. You must not copy, modify, reverse engineer, resell or exploit any part of the Service except as the law allows.`],
@@ -289,13 +289,13 @@ const TERMS=[
 ];
 const PRIVACY=[
 ['1. Who we are',`Sakura, operated by Bernard Phiri ("we", "us"), is the data controller of the personal information described in this policy. This policy explains what information we collect, why we use it, who can see it, and your rights under the Data Protection Act, 2021 of Zambia and other applicable law. Contact: ${CONTACT}.`],
-['2. Information we collect',`Account information: your email address and a password (stored in protected form; we cannot read it), and the version of the Terms you accepted and when. Profile information you provide: display name, date of birth, gender, location (as text you type, such as your city), what you are looking for, bio and photos. Gender, and anything shown in your photos or bio, may reveal sensitive information; you choose what to provide. Activity information: who you like or pass, your matches, the messages you send and receive and whether they were read, people you block, and reports you make or that are made about you. Technical information: your IP address, browser and device type and basic usage logs, collected by our hosting and infrastructure providers to run and secure the Service. We do not currently collect your precise GPS location.`],
+['2. Information we collect',`Account information: your email address and a password (stored in protected form; we cannot read it), and the version of the Terms you accepted and when. Profile information you provide: display name, date of birth, gender, location (as text you type, such as your city), what you are looking for, bio and photos. Gender, and anything shown in your photos or bio, may reveal sensitive information; you choose what to provide. Activity information: who you like or pass, your matches, the messages you send and receive and whether they were read, people you block, reports you make or that are made about you, and warnings we send you. Technical information: your IP address, browser and device type and basic usage logs, collected by our hosting and infrastructure providers to run and secure the Service. We do not currently collect your precise GPS location.`],
 ['3. How we use your information',`We use it to: create and run your account; show your profile to other users and show you other users; create matches and deliver messages; send emails needed to run your account, such as confirmation and password-reset messages; keep the Service safe, including detecting fake accounts, handling reports and enforcing our Terms; comply with the law and respond to lawful requests; and fix and improve the Service. We do not sell your personal information and we do not show advertising.`],
 ['4. Legal basis',`We process your information because you consent to it when you create an account and complete your profile, because it is necessary to provide the Service you asked for, because we have a legitimate interest in keeping the Service safe and secure, and because the law requires it in some cases. You may withdraw consent at any time by deleting your account, although this does not affect processing already carried out.`],
 ['5. What other users can see',`Other users who are shown to you can see your display name, age (calculated from your date of birth; the date itself is not shown), gender, location text, what you are looking for, bio and photos. Users you match with can also exchange messages with you. Anything you share in a message can be saved or passed on by the other person, so share carefully. Do not put phone numbers or other contact details in your profile.`],
 ['6. Who we share information with',`We share information only with: (a) service providers who help us run Sakura, including our database, authentication and file-storage provider (Supabase), our website hosting provider, and our email-delivery provider, who may process the data only on our instructions; (b) the police, courts or regulators where the law requires it or where necessary to prevent harm or crime; and (c) a successor, if the Service is transferred, who must honour this policy. We do not share your information with advertisers or data brokers.`],
 ['7. Where information is stored',`Our database and photo storage are hosted with Supabase in the European Union (Ireland region). Your information may therefore be transferred to and processed outside Zambia. We take reasonable steps to make sure our providers protect it to a standard consistent with applicable law.`],
-['8. How long we keep information',`We keep your information while your account exists. When you delete your account in the app, your profile, photos, likes, matches, messages and blocks are removed from our active systems straight away. Limited residual copies may remain in provider logs or backups for a short time before they are overwritten. We may keep information for longer where the law requires it or where it is needed to deal with a legal claim or a safety investigation. Messages you sent to other users may remain with them only if they have saved them.`],
+['8. How long we keep information',`We keep your information while your account exists. When you delete your account in the app, your profile, photos, likes, matches, messages and blocks are removed from our active systems straight away. Limited residual copies may remain in provider logs or backups for a short time before they are overwritten. We may keep information for longer where the law requires it or where it is needed to deal with a legal claim or a safety investigation. Messages you sent to other users may remain with them only if they have saved them. If an account is permanently banned, we keep the email address and the reason for the ban for as long as needed to stop the person registering again. We also keep a record of reports, warnings and moderation actions, including the part of a reported conversation that was saved with the report, for safety and legal purposes.`],
 ['9. Your rights',`Subject to applicable law, you have the right to: know what information we hold about you and receive a copy; correct inaccurate information (you can edit your profile in the app); delete your information (you can delete your account in the app); object to or restrict some processing; withdraw consent; and complain to the Data Protection Commissioner of Zambia. To use a right that you cannot use in the app, contact us at ${CONTACT}. We may need to verify your identity first.`],
 ['10. Security',`We use access controls, encrypted connections and other reasonable technical and organisational safeguards to protect your information. No online service is completely secure, and we cannot guarantee absolute security. If a breach affecting your personal data occurs, we will notify the Data Protection Commissioner and affected users as the law requires.`],
 ['11. Children',`Sakura is for adults only. We do not knowingly collect information from anyone under 18. If we learn that we have, we will delete the account and its data. If you believe a user is under 18, please report them in the app.`],
@@ -309,7 +309,7 @@ function LegalBody({start}){
   const list = doc==='terms' ? TERMS : PRIVACY;
   return h('div',null,
     h('div',{className:'seg'}, h('button',{type:'button',className:doc==='terms'?'on':'',onClick:()=>setDoc('terms')},'Terms of Service'), h('button',{type:'button',className:doc==='privacy'?'on':'',onClick:()=>setDoc('privacy')},'Privacy Policy')),
-    h('div',{className:'legal'}, h('div',{className:'meta'},'Version '+TERMS_VERSION+' · Last updated 20 November 2026'),
+    h('div',{className:'legal'}, h('div',{className:'meta'},'Version '+TERMS_VERSION+' · Last updated 22 November 2026'),
       list.map(([t,body],i)=>h('div',{key:doc+i}, h('h4',null,t), h('p',null,body)))));
 }
 function LegalCard({onBack}){
@@ -386,7 +386,7 @@ function SignupView({go}){
       options: { emailRedirectTo: REDIRECT_URL, data: { terms_version: TERMS_VERSION } }
     });
     setLoading(false);
-    if(error){ setErr(error.message); return; }
+    if(error){ setErr(/Database error|ACCOUNT_BANNED/i.test(error.message) ? 'This email cannot be used to create an account.' : error.message); return; }
     if(data.user && data.user.identities && data.user.identities.length===0){
       setErr('An account already exists for that email — try logging in.'); return;
     }
@@ -920,10 +920,22 @@ function MainApp({data, go}){
   const [showLegal,setShowLegal]=useState(false); const [tipSeen,setTipSeen]=useState(!!(data.profile&&data.profile.chat_tip_seen));
   function dismissTip(){ setTipSeen(true); sb.from('profiles').update({chat_tip_seen:true}).eq('id',me.id); }
   const inboxRef=React.useRef(inbox); inboxRef.current=inbox;
+  const tickRef=React.useRef(0); const [warns,setWarns]=useState([]);
+  async function ackWarn(id){ setWarns(w=>w.filter(x=>x.id!==id)); await sb.rpc('acknowledge_warning',{p_id:id}); }
   useEffect(()=>{ document.body.classList.add('app-mode'); return ()=>document.body.classList.remove('app-mode'); },[]);
 
   const refresh = React.useCallback(async ()=>{
-    const [l,m,s] = await Promise.all([sb.rpc('get_likes_received'), sb.rpc('get_my_matches'), sb.rpc('get_suggestions', filterArgs(filtersRef.current))]);
+    if(tickRef.current++ % 6 === 5){
+      const { error:ue } = await sb.auth.getUser();
+      if(ue && /does not exist|user_not_found|sub claim/i.test(ue.message||'')){
+        try{ await sb.auth.signOut({scope:'local'}); }catch(e){}
+        go('login',{notice:'Your account is no longer available. If you think this is a mistake, contact phiribernard765@gmail.com.'});
+        return inboxRef.current;
+      }
+    }
+    const [l,m,s,wn] = await Promise.all([sb.rpc('get_likes_received'), sb.rpc('get_my_matches'), sb.rpc('get_suggestions', filterArgs(filtersRef.current)),
+      sb.from('warnings').select('*').eq('user_id',me.id).is('acknowledged_at',null).order('created_at',{ascending:true})]);
+    if(!wn.error) setWarns(wn.data||[]);
     const prev = inboxRef.current;
     const st = {likes:l.error?prev.likes:(l.data||[]), matches:m.error?prev.matches:(m.data||[]), sugg:s.error?prev.sugg:(s.data||[])};
     setInbox(st); return st;
@@ -990,7 +1002,12 @@ function MainApp({data, go}){
     showTips ? h(TipsSheet,{onClose:()=>setShowTips(false)}) : null,
     showFilters ? h(FilterSheet,{filters,onApply:applyFilters,onClose:()=>setShowFilters(false)}) : null,
     showLegal ? h('div',{className:'sheet top'}, h('h3',{style:{margin:'20px 0 12px',fontSize:22}},'Terms and Privacy'), h(LegalBody), h('div',{style:{flex:1}}), h('button',{className:'btn',style:{marginTop:12},onClick:()=>setShowLegal(false)},'Close')) : null,
-    safety ? h(SafetySheet,{mode:safety.mode,person:safety.person,me,onClose:()=>setSafety(null),onDone:safetyDone}) : null
+    safety ? h(SafetySheet,{mode:safety.mode,person:safety.person,me,onClose:()=>setSafety(null),onDone:safetyDone}) : null,
+    warns.length ? h('div',{className:'sheet top center'},
+      h('h3',{style:{fontSize:22}},'A message from Sakura'),
+      h('span',{className:'tag'},warns[0].violation),
+      h('p',{style:{lineHeight:1.5,margin:'6px 0 14px'}},warns[0].message),
+      h('button',{className:'btn',onClick:()=>ackWarn(warns[0].id)},'I understand')) : null
   );
 }
 
