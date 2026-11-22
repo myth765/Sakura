@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex, nofollow" />
+<meta name="color-scheme" content="light" />
+<title>Sakura Admin</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+  :root{ --ink:#1F1B2E; --soft:#6B6880; --line:#E8E6F0; --bg:#F3F1F8; --card:#fff; --accent:#6D3BD2; --accent2:#9B5CFF; --red:#D14343; --green:#2F8F5B; --amber:#B7791F; color-scheme:light; }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--ink); font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif; font-size:15px; line-height:1.45;}
+  .wrap{max-width:780px; margin:0 auto; padding:0 14px 60px;}
+  header{position:sticky; top:0; z-index:5; background:#fff; border-bottom:1px solid var(--line);}
+  header .in{max-width:780px; margin:0 auto; padding:12px 14px; display:flex; align-items:center; gap:10px;}
+  header b{font-size:17px;} header .sp{flex:1;} header small{color:var(--soft);}
+  .tabs{display:flex; gap:6px; overflow-x:auto; padding:10px 14px; max-width:780px; margin:0 auto;}
+  .tab{border:none; background:#fff; border:1px solid var(--line); border-radius:999px; padding:8px 14px; font-size:14px; cursor:pointer; white-space:nowrap; font-family:inherit; color:var(--ink);}
+  .tab.on{background:linear-gradient(135deg,var(--accent2),var(--accent)); color:#fff; border-color:transparent;}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px; margin:10px 0;}
+  .card.click{cursor:pointer;} .card.click:active{background:#FAF9FD;}
+  h2{margin:18px 0 6px; font-size:20px;} h3{margin:0 0 6px; font-size:16px;}
+  .grid{display:grid; grid-template-columns:repeat(2,1fr); gap:10px;}
+  @media(min-width:560px){ .grid{grid-template-columns:repeat(3,1fr);} }
+  .stat{background:#fff; border:1px solid var(--line); border-radius:14px; padding:14px;} .stat b{display:block; font-size:26px;} .stat span{color:var(--soft); font-size:13px;}
+  .row{display:flex; gap:10px; align-items:center;} .sp{flex:1; min-width:0;}
+  .av{width:48px; height:48px; border-radius:50%; background:#EFEAFE center/cover no-repeat; flex-shrink:0; display:flex; align-items:center; justify-content:center; color:var(--accent); font-weight:700;}
+  .meta{color:var(--soft); font-size:13px;}
+  .badge{display:inline-block; padding:2px 9px; border-radius:999px; font-size:12px; margin:2px 4px 0 0; background:#EFEAFE; color:#4B2BB5;}
+  .badge.red{background:#FBEAEA; color:var(--red);} .badge.green{background:#E6F4EC; color:var(--green);} .badge.amber{background:#FFF3DC; color:var(--amber);}
+  button.btn{border:none; border-radius:10px; padding:10px 14px; font-size:14px; font-family:inherit; cursor:pointer; background:linear-gradient(135deg,var(--accent2),var(--accent)); color:#fff;}
+  button.btn.ghost{background:#fff; color:var(--accent); border:1.5px solid var(--line);}
+  button.btn.red{background:var(--red);} button.btn.sm{padding:7px 11px; font-size:13px;} button.btn:disabled{opacity:.5;}
+  .btns{display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;}
+  input,select,textarea{width:100%; padding:11px 12px; border:1.5px solid var(--line); border-radius:10px; font-size:15px; font-family:inherit; background:#fff; color:var(--ink);}
+  textarea{min-height:100px; resize:vertical;} label{display:block; font-size:13px; font-weight:600; margin:10px 0 5px;}
+  .msg{padding:10px 12px; border-radius:10px; margin:10px 0; font-size:14px;} .msg.err{background:#FBEAEA; color:var(--red);} .msg.ok{background:#E6F4EC; color:var(--green);}
+  .bub{max-width:82%; padding:8px 12px; border-radius:14px; margin:6px 0; font-size:14px; overflow-wrap:anywhere;}
+  .bub.reporter{background:#EFEAFE; margin-right:auto;} .bub.reported{background:#FBEAEA; margin-left:auto;}
+  .bub small{display:block; color:var(--soft); font-size:11px; margin-bottom:2px;}
+  .photos{display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;} .ph{position:relative; width:90px; height:120px; border-radius:10px; background:#EFEAFE center/cover no-repeat;}
+  .ph button{position:absolute; bottom:4px; left:4px; right:4px; font-size:11px; padding:4px; border:none; border-radius:6px; background:rgba(209,67,67,.92); color:#fff; cursor:pointer;}
+  .modal{position:fixed; inset:0; background:rgba(20,15,35,.5); z-index:20; display:flex; align-items:flex-end; justify-content:center;}
+  @media(min-width:560px){ .modal{align-items:center;} }
+  .modal .box{background:#fff; width:100%; max-width:520px; max-height:92vh; overflow-y:auto; border-radius:18px 18px 0 0; padding:18px;}
+  @media(min-width:560px){ .modal .box{border-radius:18px;} }
+  .center{max-width:380px; margin:70px auto 0; padding:0 14px;}
+  .back{background:none; border:none; color:var(--accent); font-size:15px; cursor:pointer; padding:10px 0; font-family:inherit;}
+  .kv{display:grid; grid-template-columns:120px 1fr; gap:4px 10px; font-size:14px;} .kv span:nth-child(odd){color:var(--soft);}
+  .qr{display:block; margin:10px auto; width:200px; height:200px;}
+  code{background:#F3F1F8; padding:2px 6px; border-radius:6px; font-size:13px; word-break:break-all;}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+const h = React.createElement;
+const { useState, useEffect, useCallback } = React;
+const ADMIN_VERSION = 'admin v1';
+const sb = window.supabase.createClient(
+  'https://nnlrogdehrmdgyarxyhz.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ubHJvZ2RlaHJtZGd5YXJ4eWh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA0NTA1MTUsImV4cCI6MjEwNjAyNjUxNX0.UToKAdLrTF8its_opVsNxqnmT1_-MKO1bKQ5hEyKZNA');
+
+const TAIL = ' Please stop. Further breaches may lead to your account being permanently banned.';
+const VIOL = {
+  'Harassment': 'Your behaviour towards another user broke our rules against harassment and bullying.',
+  'Scam or fraud': 'Your account was reported for scam or fraud behaviour, which is not allowed on Sakura.',
+  'Asking for money': 'Asking other users for money or gifts is not allowed on Sakura.',
+  'Fake profile or catfishing': 'Your profile appears to be fake or misleading. Profiles must be about you and use your own photos.',
+  'Inappropriate photos': 'One or more of your photos broke our rules on nudity or inappropriate content.',
+  'Sexual content': 'Sexual or explicit content is not allowed on Sakura.',
+  'Hate speech or threats': 'Hate speech, threats and violent language are not allowed on Sakura.',
+  'Spam or advertising': 'Advertising, selling or promoting products or services is not allowed on Sakura.',
+  'Contact details in profile': 'Please remove contact details from your profile. You can share them privately in chat after you match.',
+  'Other': ''
+};
+const ACTION_NAMES = { viewed_report:'Viewed a report', report_resolved:'Resolved a report', report_dismissed:'Dismissed a report', report_open:'Reopened a report', warned:'Sent a warning', deleted_account:'Deleted an account', banned_forever:'Banned forever', unbanned:'Removed a ban', removed_photo:'Removed a photo' };
+
+const fmt = (t) => t ? new Date(t).toLocaleString([], {dateStyle:'medium', timeStyle:'short'}) : '-';
+async function rpc(name, args){ const { data, error } = await sb.rpc(name, args || {}); if(error) throw new Error(error.message); return data; }
+function useLoad(fn, deps){
+  const [st,setSt]=useState({loading:true,data:null,err:''});
+  const load=useCallback(()=>{ setSt(s=>({...s,loading:true,err:''})); fn().then(d=>setSt({loading:false,data:d,err:''})).catch(e=>setSt({loading:false,data:null,err:e.message})); },deps);
+  useEffect(()=>{ load(); },[load]);
+  return [st,load];
+}
+const Msg = ({type,children}) => children ? h('div',{className:'msg '+type},children) : null;
+const Avatar = ({url,name,size}) => h('div',{className:'av',style:{backgroundImage:url?'url('+url+')':undefined,width:size,height:size}}, url?null:(name||'?')[0]);
+const Loading = ({st}) => st.loading ? h('div',{className:'meta',style:{padding:20}},'Loading...') : (st.err ? h(Msg,{type:'err'},st.err) : null);
+
+/* ---------- sign-in, two-step login, access check ---------- */
+function Login({onDone}){
+  const [email,setEmail]=useState(''); const [pw,setPw]=useState(''); const [err,setErr]=useState(''); const [busy,setBusy]=useState(false);
+  async function go(e){ e.preventDefault(); setErr(''); setBusy(true);
+    const { error } = await sb.auth.signInWithPassword({email,password:pw}); setBusy(false);
+    if(error){ setErr(error.message); return; } onDone(); }
+  return h('div',{className:'center'}, h('h2',null,'Sakura Admin'), h('div',{className:'meta'},'Sign in with your Sakura account. Only the owner can enter.'),
+    h(Msg,{type:'err'},err),
+    h('form',{onSubmit:go}, h('label',null,'Email'), h('input',{type:'email',value:email,onChange:e=>setEmail(e.target.value),autoComplete:'email'}),
+      h('label',null,'Password'), h('input',{type:'password',value:pw,onChange:e=>setPw(e.target.value),autoComplete:'current-password'}),
+      h('div',{className:'btns'}, h('button',{className:'btn',disabled:busy},busy?'Signing in...':'Sign in'))));
+}
+function MfaVerify({onDone,onOut}){
+  const [code,setCode]=useState(''); const [err,setErr]=useState(''); const [busy,setBusy]=useState(false);
+  async function go(e){ e.preventDefault(); setErr(''); setBusy(true);
+    try{
+      const lf = await sb.auth.mfa.listFactors(); if(lf.error) throw lf.error;
+      const f = lf.data.totp[0]; if(!f) throw new Error('No authenticator is set up on this account.');
+      const ch = await sb.auth.mfa.challenge({factorId:f.id}); if(ch.error) throw ch.error;
+      const vr = await sb.auth.mfa.verify({factorId:f.id,challengeId:ch.data.id,code:code.trim()}); if(vr.error) throw vr.error;
+      onDone();
+    }catch(ex){ setErr(ex.message); setBusy(false); } }
+  return h('div',{className:'center'}, h('h2',null,'Two-step login'), h('div',{className:'meta'},'Enter the 6-digit code from your authenticator app.'),
+    h(Msg,{type:'err'},err),
+    h('form',{onSubmit:go}, h('label',null,'Code'), h('input',{value:code,inputMode:'numeric',maxLength:6,onChange:e=>setCode(e.target.value),autoFocus:true}),
+      h('div',{className:'btns'}, h('button',{className:'btn',disabled:busy},busy?'Checking...':'Continue'), h('button',{type:'button',className:'btn ghost',onClick:onOut},'Sign out'))));
+}
+function MfaEnroll({onDone,onOut,onSkip}){
+  const [info,setInfo]=useState(null); const [code,setCode]=useState(''); const [err,setErr]=useState(''); const [busy,setBusy]=useState(false); const [failed,setFailed]=useState(false);
+  useEffect(()=>{ (async()=>{
+    try{
+      const lf = await sb.auth.mfa.listFactors();
+      const stale = (lf.data && lf.data.all || []).filter(f=>f.status==='unverified');
+      for(const f of stale){ await sb.auth.mfa.unenroll({factorId:f.id}); }
+      const en = await sb.auth.mfa.enroll({factorType:'totp',friendlyName:'Sakura admin '+Date.now()});
+      if(en.error) throw en.error; setInfo(en.data);
+    }catch(ex){ setErr(ex.message); setFailed(true); } })(); },[]);
+  async function go(e){ e.preventDefault(); setErr(''); setBusy(true);
+    const r = await sb.auth.mfa.challengeAndVerify({factorId:info.id,code:code.trim()}); setBusy(false);
+    if(r.error){ setErr(r.error.message); return; } onDone(); }
+  return h('div',{className:'center'}, h('h2',null,'Set up two-step login'),
+    h('div',{className:'meta'},'This protects the admin page even if someone learns your password. Scan the picture with Google Authenticator, Microsoft Authenticator or Authy, then type the 6-digit code it shows.'),
+    h(Msg,{type:'err'},err),
+    info ? h('div',null, h('img',{className:'qr',src:info.totp.qr_code,alt:'QR code'}),
+      h('div',{className:'meta'},'Cannot scan? Type this key into your app: ', h('code',null,info.totp.secret)),
+      h('form',{onSubmit:go}, h('label',null,'6-digit code'), h('input',{value:code,inputMode:'numeric',maxLength:6,onChange:e=>setCode(e.target.value)}),
+        h('div',{className:'btns'}, h('button',{className:'btn',disabled:busy},busy?'Checking...':'Turn on'), h('button',{type:'button',className:'btn ghost',onClick:onOut},'Sign out')))) : (failed ? null : h('div',{className:'meta'},'Preparing...')),
+    failed ? h('div',{className:'btns'}, h('button',{className:'btn ghost',onClick:onSkip},'Continue without it this time'), h('button',{className:'btn ghost',onClick:onOut},'Sign out')) : null);
+}
+
+/* ---------- dialogs ---------- */
+function ActionDialog({kind,target,reportId,onClose,onDone}){
+  const [viol,setViol]=useState('Harassment'); const [msg,setMsg]=useState(VIOL['Harassment']+TAIL);
+  const [reason,setReason]=useState(''); const [confirm,setConfirm]=useState(''); const [busy,setBusy]=useState(false); const [err,setErr]=useState('');
+  const word = kind==='ban' ? 'BAN' : 'DELETE';
+  function pick(v){ setViol(v); setMsg(VIOL[v] ? VIOL[v]+TAIL : ''); }
+  async function wipe(){ try{ const { data:files } = await sb.storage.from('avatars').list(target.id,{limit:100}); if(files && files.length) await sb.storage.from('avatars').remove(files.map(f=>target.id+'/'+f.name)); }catch(e){} }
+  async function go(){
+    setErr('');
+    try{
+      if(kind==='warn'){
+        if(!msg.trim()) throw new Error('Write the warning message.');
+        setBusy(true); await rpc('admin_warn_user',{p_user:target.id,p_violation:viol,p_message:msg.trim(),p_report:reportId||null});
+      }else{
+        if(confirm.trim().toUpperCase()!==word) throw new Error('Type '+word+' to confirm.');
+        if(kind==='ban' && !reason.trim()) throw new Error('A reason is required for a ban.');
+        setBusy(true); await rpc(kind==='ban'?'admin_ban_user':'admin_delete_user',{p_user:target.id,p_reason:reason.trim()||null,p_report:reportId||null});
+        await wipe();
+      }
+      onDone(kind);
+    }catch(ex){ setErr(ex.message); setBusy(false); }
+  }
+  const titles={warn:'Send a warning',delete:'Delete account',ban:'Ban forever'};
+  return h('div',{className:'modal',onClick:(e)=>{ if(e.target===e.currentTarget && !busy) onClose(); }},
+    h('div',{className:'box'},
+      h('h3',null,titles[kind]+': '+target.label),
+      h(Msg,{type:'err'},err),
+      kind==='warn' ? h('div',null,
+        h('div',{className:'meta'},'The person sees this message the next time the app checks, and must tap "I understand".'),
+        h('label',null,'Violation'), h('select',{value:viol,onChange:e=>pick(e.target.value)}, Object.keys(VIOL).map(k=>h('option',{key:k,value:k},k))),
+        h('label',null,'Message to the user'), h('textarea',{value:msg,maxLength:1000,onChange:e=>setMsg(e.target.value)}))
+      : h('div',null,
+        h('div',{className:'meta'}, kind==='ban'
+          ? 'This deletes the account and its data, and blocks this email address (including Gmail dot and plus variations) from ever signing up again.'
+          : 'This deletes the account and its data. The person can sign up again later.'),
+        h('label',null,kind==='ban'?'Reason (required, kept in the ban list)':'Reason (optional, kept in the activity log)'), h('input',{value:reason,onChange:e=>setReason(e.target.value)}),
+        h('label',null,'Type '+word+' to confirm'), h('input',{value:confirm,onChange:e=>setConfirm(e.target.value),autoCapitalize:'characters'})),
+      h('div',{className:'btns'},
+        h('button',{className:'btn'+(kind==='warn'?'':' red'),disabled:busy,onClick:go},busy?'Please wait...':(kind==='warn'?'Send warning':kind==='ban'?'Ban forever':'Delete account')),
+        h('button',{className:'btn ghost',disabled:busy,onClick:onClose},'Cancel'))));
+}
+
+function ActionButtons({target,reportId,onChanged}){
+  const [dlg,setDlg]=useState(null); const [done,setDone]=useState('');
+  return h('div',null,
+    h(Msg,{type:'ok'},done),
+    h('div',{className:'btns'},
+      h('button',{className:'btn sm',onClick:()=>setDlg('warn')},'Warn'),
+      h('button',{className:'btn sm red',onClick:()=>setDlg('delete')},'Delete account'),
+      h('button',{className:'btn sm red',onClick:()=>setDlg('ban')},'Ban forever')),
+    dlg ? h(ActionDialog,{kind:dlg,target,reportId,onClose:()=>setDlg(null),onDone:(k)=>{ setDlg(null); setDone(k==='warn'?'Warning sent.':k==='ban'?'Banned. The account is gone and the email is blocked.':'Account deleted.'); onChanged(k); }}) : null);
+}
+
+/* ---------- overview ---------- */
+function Overview(){
+  const [st]=useLoad(()=>rpc('admin_stats'),[]);
+  if(st.loading||st.err) return h(Loading,{st});
+  const s=st.data; const items=[['Total users',s.users],['New today',s.new_today],['New this week',s.new_week],['Profiles completed',s.complete],['Men',s.men],['Women',s.women],['Matches',s.matches],['Messages',s.messages],['Open reports',s.open_reports],['Warnings sent',s.warnings],['Banned emails',s.banned]];
+  return h('div',null, h('h2',null,'Overview'), h('div',{className:'grid'}, items.map(([k,v])=>h('div',{key:k,className:'stat'},h('b',null,v),h('span',null,k)))));
+}
+
+/* ---------- reports ---------- */
+function Reports({openReport}){
+  const [status,setStatus]=useState('open');
+  const [st]=useLoad(()=>rpc('admin_list_reports',{p_status:status}),[status]);
+  return h('div',null, h('h2',null,'Reports'),
+    h('div',{className:'tabs',style:{padding:'0 0 8px'}}, ['open','resolved','dismissed','all'].map(s=>h('button',{key:s,className:'tab'+(status===s?' on':''),onClick:()=>setStatus(s)},s[0].toUpperCase()+s.slice(1)))),
+    h(Loading,{st}),
+    st.data && st.data.length===0 ? h('div',{className:'meta',style:{padding:10}},'No '+(status==='all'?'':status+' ')+'reports.') : null,
+    (st.data||[]).map(r=>h('div',{key:r.id,className:'card click',onClick:()=>openReport(r.id)},
+      h('div',{className:'row'}, h('div',{className:'sp'}, h('h3',null,r.category), h('div',{className:'meta'},'About: '+(r.reported_label||'(deleted account)')), h('div',{className:'meta'},'By: '+(r.reporter_label||'(deleted account)')+' · '+fmt(r.created_at))),
+        h('div',null, h('span',{className:'badge '+(r.status==='open'?'amber':'green')},r.status))),
+      r.description ? h('div',{style:{marginTop:6}},r.description) : null,
+      h('div',null, r.has_evidence ? h('span',{className:'badge'},'Chat saved') : null, r.about_same>1 ? h('span',{className:'badge red'},r.about_same+' reports about this person') : null))));
+}
+function ReportDetail({id,onBack,openUser}){
+  const [st,reload]=useLoad(()=>rpc('admin_get_report',{p_report:id}),[id]);
+  const [note,setNote]=useState(''); const [err,setErr]=useState('');
+  async function setStatus(s){ setErr(''); try{ await rpc('admin_resolve_report',{p_report:id,p_status:s,p_note:note}); reload(); }catch(e){ setErr(e.message); } }
+  if(st.loading||st.err) return h('div',null,h('button',{className:'back',onClick:onBack},'< Back'),h(Loading,{st}));
+  const r=st.data; const snap=r.reported_snapshot||{}; const imgs=[snap.avatar_url].concat(snap.photos||[]).filter(Boolean);
+  return h('div',null, h('button',{className:'back',onClick:onBack},'< Back to reports'),
+    h('div',{className:'card'}, h('div',{className:'row'}, h('h3',{className:'sp'},r.category), h('span',{className:'badge '+(r.status==='open'?'amber':'green')},r.status)),
+      h('div',{className:'kv'}, h('span',null,'About'),h('span',null,r.reported_label||'-'), h('span',null,'Reported by'),h('span',null,r.reporter_label||'-'), h('span',null,'Filed'),h('span',null,fmt(r.created_at)),
+        h('span',null,'Other reports'),h('span',null,String(Math.max(0,(r.reports_about_same||1)-1))+' more about this person'),
+        r.resolution ? h('span',null,'Outcome') : null, r.resolution ? h('span',null,r.resolution+' ('+fmt(r.resolved_at)+')') : null),
+      r.description ? h('div',{style:{marginTop:10}},h('b',null,'What they wrote: '),r.description) : null),
+    h('div',{className:'card'}, h('h3',null,'Reported person (when reported)'),
+      h('div',{className:'row'}, h(Avatar,{url:snap.avatar_url,name:snap.display_name,size:48}), h('div',{className:'sp'}, h('b',null,snap.display_name||'-'), h('div',{className:'meta'},[snap.gender,snap.location].filter(Boolean).join(' · ')))),
+      snap.bio ? h('div',{style:{marginTop:8}},snap.bio) : null,
+      imgs.length ? h('div',{className:'photos'}, imgs.map((u,i)=>h('a',{key:i,href:u,target:'_blank',rel:'noreferrer'},h('div',{className:'ph',style:{backgroundImage:'url('+u+')'}})))) : null,
+      r.reported_exists ? h('div',{className:'btns'},h('button',{className:'btn ghost sm',onClick:()=>openUser(r.reported_id)},'Open their full profile')) : h('div',{className:'meta',style:{marginTop:8}},'This account no longer exists.')),
+    h('div',{className:'card'}, h('h3',null,'Saved chat between them'),
+      !r.evidence || !r.evidence.length ? h('div',{className:'meta'},'No chat was saved. They were not matched when the report was filed.')
+        : h('div',null, h('div',{className:'meta'},'Last '+r.evidence.length+' messages. Purple = the person who reported, red = the person reported.'), r.evidence.map((m,i)=>h('div',{key:i,className:'bub '+m.from},h('small',null,(m.from==='reporter'?'Reporter':'Reported')+' · '+fmt(m.at)),m.body)))),
+    r.reported_exists ? h('div',{className:'card'}, h('h3',null,'Take action'), h('div',{className:'meta'},'Acting from here marks this report as resolved.'),
+      h(ActionButtons,{target:{id:r.reported_id,label:r.reported_label||'user'},reportId:r.id,onChanged:()=>reload()})) : null,
+    h('div',{className:'card'}, h('h3',null,'Close the report without action'), h(Msg,{type:'err'},err),
+      h('label',null,'Note (optional)'), h('input',{value:note,onChange:e=>setNote(e.target.value),placeholder:'e.g. No breach found'}),
+      h('div',{className:'btns'}, r.status==='open' ? h('button',{className:'btn ghost sm',onClick:()=>setStatus('resolved')},'Mark resolved') : null,
+        r.status==='open' ? h('button',{className:'btn ghost sm',onClick:()=>setStatus('dismissed')},'Dismiss (no problem found)') : null,
+        r.status!=='open' ? h('button',{className:'btn ghost sm',onClick:()=>setStatus('open')},'Reopen') : null)));
+}
+
+/* ---------- users ---------- */
+function Users({openUser}){
+  const [q,setQ]=useState(''); const [applied,setApplied]=useState(''); const [filter,setFilter]=useState('all');
+  const [rows,setRows]=useState([]); const [total,setTotal]=useState(0); const [loading,setLoading]=useState(true); const [err,setErr]=useState('');
+  const load=useCallback(async(reset)=>{
+    setLoading(true); setErr('');
+    try{ const off=reset?0:rows.length; const d=await rpc('admin_list_users',{p_search:applied,p_filter:filter,p_limit:30,p_offset:off});
+      setRows(reset?d.rows:rows.concat(d.rows)); setTotal(d.total); }catch(e){ setErr(e.message); }
+    setLoading(false);
+  },[applied,filter,rows.length]);
+  useEffect(()=>{ load(true); },[applied,filter]);
+  return h('div',null, h('h2',null,'Users'),
+    h('form',{className:'row',onSubmit:(e)=>{ e.preventDefault(); setApplied(q.trim()); }}, h('input',{value:q,onChange:e=>setQ(e.target.value),placeholder:'Search name or email'}), h('button',{className:'btn'},'Search')),
+    h('div',{style:{marginTop:8}}, h('select',{value:filter,onChange:e=>setFilter(e.target.value)}, h('option',{value:'all'},'All users'), h('option',{value:'reported'},'Reported by others'), h('option',{value:'warned'},'Warned before'), h('option',{value:'incomplete'},'Profile not finished'))),
+    h('div',{className:'meta',style:{margin:'8px 2px'}},total+' user'+(total===1?'':'s')),
+    h(Msg,{type:'err'},err),
+    rows.map(u=>h('div',{key:u.id,className:'card click',onClick:()=>openUser(u.id)},
+      h('div',{className:'row'}, h(Avatar,{url:u.avatar_url,name:u.display_name||u.email,size:48}),
+        h('div',{className:'sp'}, h('b',null,u.display_name||'(no profile yet)'), h('div',{className:'meta',style:{overflowWrap:'anywhere'}},u.email),
+          h('div',{className:'meta'},[u.age?u.age+' yrs':null,u.gender,u.location].filter(Boolean).join(' · ')),
+          h('div',{className:'meta'},'Joined '+fmt(u.created_at)+' · last seen '+fmt(u.last_sign_in_at)),
+          h('div',null, u.reports_against>0 ? h('span',{className:'badge red'},u.reports_against+' report'+(u.reports_against>1?'s':'')) : null, u.warnings>0 ? h('span',{className:'badge amber'},u.warnings+' warning'+(u.warnings>1?'s':'')) : null, !u.is_complete ? h('span',{className:'badge'},'profile unfinished') : null))))),
+    loading ? h('div',{className:'meta',style:{padding:10}},'Loading...') : null,
+    !loading && rows.length<total ? h('div',{className:'btns'},h('button',{className:'btn ghost',onClick:()=>load(false)},'Load more')) : null);
+}
+function UserDetail({id,onBack,openReport}){
+  const [st,reload]=useLoad(()=>rpc('admin_get_user',{p_user:id}),[id]);
+  const [err,setErr]=useState(''); const [gone,setGone]=useState('');
+  async function removePhoto(url){
+    if(!window.confirm('Remove this photo from the profile?')) return; setErr('');
+    try{ await rpc('admin_remove_photo',{p_user:id,p_url:url,p_reason:'Removed by admin'}); const path=url.split('/avatars/')[1]; if(path) await sb.storage.from('avatars').remove([path]); reload(); }catch(e){ setErr(e.message); }
+  }
+  if(st.loading||st.err) return h('div',null,h('button',{className:'back',onClick:onBack},'< Back'),h(Loading,{st}));
+  const d=st.data; const a=d.account, p=d.profile||{};
+  if(!a) return h('div',null,h('button',{className:'back',onClick:onBack},'< Back'),h('div',{className:'card'},'This account no longer exists.'));
+  const imgs=[p.avatar_url].concat(p.photos||[]).filter(Boolean);
+  const label=(p.display_name||'(no name)')+' <'+a.email+'>';
+  return h('div',null, h('button',{className:'back',onClick:onBack},'< Back'),
+    h('div',{className:'card'}, h('div',{className:'row'}, h(Avatar,{url:p.avatar_url,name:p.display_name,size:56}), h('div',{className:'sp'}, h('h3',null,p.display_name||'(no profile yet)'), h('div',{className:'meta',style:{overflowWrap:'anywhere'}},a.email))),
+      h('div',{className:'kv',style:{marginTop:10}},
+        h('span',null,'Joined'),h('span',null,fmt(a.created_at)), h('span',null,'Last seen'),h('span',null,fmt(a.last_sign_in_at)),
+        h('span',null,'Birthday'),h('span',null,p.birthday||'-'), h('span',null,'Gender'),h('span',null,p.gender||'-'),
+        h('span',null,'Location'),h('span',null,p.location||'-'), h('span',null,'Looking for'),h('span',null,p.looking_for||'-'),
+        h('span',null,'Terms accepted'),h('span',null,p.terms_version?p.terms_version+' ('+fmt(p.terms_accepted_at)+')':'not yet'),
+        h('span',null,'Activity'),h('span',null,d.matches+' matches · '+d.likes_given+' likes given · '+d.likes_received+' received · '+d.messages_sent+' messages sent')),
+      p.bio ? h('div',{style:{marginTop:10}},h('b',null,'Bio: '),p.bio) : null),
+    imgs.length ? h('div',{className:'card'}, h('h3',null,'Photos'), h(Msg,{type:'err'},err), h('div',{className:'photos'}, imgs.map((u,i)=>h('div',{key:i,className:'ph',style:{backgroundImage:'url('+u+')'}}, h('button',{onClick:()=>removePhoto(u)},'Remove'))))) : null,
+    h('div',{className:'card'}, h('h3',null,'Reports about this person ('+d.reports_against.length+')'),
+      d.reports_against.length ? d.reports_against.map(r=>h('div',{key:r.id,className:'row',style:{padding:'8px 0',borderTop:'1px solid #F0EEF6',cursor:'pointer'},onClick:()=>openReport(r.id)}, h('div',{className:'sp'},h('b',null,r.category),h('div',{className:'meta'},fmt(r.created_at)+' · '+(r.reporter_label||'')),r.description?h('div',null,r.description):null), h('span',{className:'badge '+(r.status==='open'?'amber':'green')},r.status))) : h('div',{className:'meta'},'None.'),
+      h('div',{className:'meta',style:{marginTop:6}},'Reports this person made: '+d.reports_made)),
+    h('div',{className:'card'}, h('h3',null,'Warnings sent ('+d.warnings.length+')'),
+      d.warnings.length ? d.warnings.map(w=>h('div',{key:w.id,style:{padding:'8px 0',borderTop:'1px solid #F0EEF6'}}, h('b',null,w.violation),h('div',{className:'meta'},fmt(w.created_at)+' · '+(w.acknowledged_at?'seen '+fmt(w.acknowledged_at):'not yet seen')),h('div',null,w.message))) : h('div',{className:'meta'},'None.')),
+    d.is_admin ? h('div',{className:'card'},'This is an admin account. It cannot be warned, deleted or banned here.')
+      : h('div',{className:'card'}, h('h3',null,'Take action'), gone ? h(Msg,{type:'ok'},gone) : null,
+          h(ActionButtons,{target:{id,label},onChanged:(k)=>{ if(k==='warn'){ reload(); } else { setGone(k==='ban'?'Banned and removed.':'Account deleted.'); setTimeout(onBack,1200); } }})));
+}
+
+/* ---------- banned list and activity log ---------- */
+function Banned(){
+  const [st,reload]=useLoad(()=>rpc('admin_list_banned'),[]); const [err,setErr]=useState('');
+  async function unban(k,email){ if(!window.confirm('Allow '+email+' to sign up again?')) return; try{ await rpc('admin_unban',{p_key:k}); reload(); }catch(e){ setErr(e.message); } }
+  return h('div',null, h('h2',null,'Banned emails'), h('div',{className:'meta'},'These emails can never create a new account. Remove an entry to give someone a second chance.'),
+    h(Loading,{st}), h(Msg,{type:'err'},err),
+    st.data && !st.data.length ? h('div',{className:'meta',style:{padding:10}},'Nobody is banned.') : null,
+    (st.data||[]).map(b=>h('div',{key:b.key,className:'card'}, h('div',{className:'row'}, h('div',{className:'sp'},h('b',{style:{overflowWrap:'anywhere'}},b.email),h('div',{className:'meta'},fmt(b.banned_at)),h('div',null,b.reason||'')), h('button',{className:'btn ghost sm',onClick:()=>unban(b.key,b.email)},'Unban')))));
+}
+function Log(){
+  const [st]=useLoad(()=>rpc('admin_list_actions',{p_limit:150}),[]);
+  const detail=(d)=>{ if(!d) return ''; return [d.violation&&('Violation: '+d.violation), d.reason&&('Reason: '+d.reason), d.note&&('Note: '+d.note), d.report&&('Report #'+d.report)].filter(Boolean).join(' · '); };
+  return h('div',null, h('h2',null,'Activity log'), h('div',{className:'meta'},'Everything you do or look at as admin is recorded here.'), h(Loading,{st}),
+    (st.data||[]).map(a=>h('div',{key:a.id,className:'card'}, h('b',null,ACTION_NAMES[a.action]||a.action), h('div',{className:'meta'},fmt(a.at)), a.target?h('div',null,a.target):null, h('div',{className:'meta'},detail(a.details)))));
+}
+
+/* ---------- shell ---------- */
+function Dashboard({email,onOut}){
+  const [tab,setTab]=useState('overview'); const [view,setView]=useState(null);
+  const [st]=useLoad(()=>rpc('admin_stats'),[]);
+  const openReport=(id)=>{ setView({t:'report',id}); }; const openUser=(id)=>{ setView({t:'user',id}); };
+  const tabs=[['overview','Overview'],['reports','Reports'+(st.data&&st.data.open_reports?' ('+st.data.open_reports+')':'')],['users','Users'],['banned','Banned'],['log','Log']];
+  let body;
+  if(view && view.t==='report') body=h(ReportDetail,{id:view.id,onBack:()=>setView(null),openUser});
+  else if(view && view.t==='user') body=h(UserDetail,{id:view.id,onBack:()=>setView(null),openReport});
+  else body = tab==='overview'?h(Overview):tab==='reports'?h(Reports,{openReport}):tab==='users'?h(Users,{openUser}):tab==='banned'?h(Banned):h(Log);
+  return h('div',null,
+    h('header',null, h('div',{className:'in'}, h('b',null,'Sakura Admin'), h('small',null,ADMIN_VERSION), h('span',{className:'sp'}), h('small',{style:{overflowWrap:'anywhere'}},email), h('button',{className:'btn ghost sm',onClick:onOut},'Sign out')),
+      h('div',{className:'tabs'}, tabs.map(([id,l])=>h('button',{key:id,className:'tab'+(tab===id&&!view?' on':''),onClick:()=>{ setView(null); setTab(id); }},l)))),
+    h('div',{className:'wrap'}, body));
+}
+
+function App(){
+  const [stage,setStage]=useState('loading'); const [email,setEmail]=useState('');
+  const check=useCallback(async()=>{
+    const { data:{ session } } = await sb.auth.getSession();
+    if(!session){ setStage('login'); return; }
+    setEmail(session.user.email);
+    const { data:aal } = await sb.auth.mfa.getAuthenticatorAssuranceLevel();
+    if(aal && aal.nextLevel==='aal2' && aal.currentLevel!=='aal2'){ setStage('mfa-verify'); return; }
+    const { data:ok } = await sb.rpc('is_admin');
+    if(ok!==true){ setStage('denied'); return; }
+    if(aal && aal.nextLevel==='aal1' && !sessionStorage.getItem('skip_mfa')){ setStage('mfa-enroll'); return; }
+    setStage('ready');
+  },[]);
+  useEffect(()=>{ check(); },[check]);
+  async function out(){ await sb.auth.signOut(); sessionStorage.removeItem('skip_mfa'); setStage('login'); }
+  if(stage==='loading') return h('div',{className:'center'},h('div',{className:'meta'},'Loading...'));
+  if(stage==='login') return h(Login,{onDone:check});
+  if(stage==='mfa-verify') return h(MfaVerify,{onDone:check,onOut:out});
+  if(stage==='mfa-enroll') return h(MfaEnroll,{onDone:check,onOut:out,onSkip:()=>{ sessionStorage.setItem('skip_mfa','1'); setStage('ready'); }});
+  if(stage==='denied') return h('div',{className:'center'},h('h2',null,'Access denied'),h('div',{className:'msg err'},'This account is not an admin.'),h('div',{className:'btns'},h('button',{className:'btn',onClick:out},'Sign out')));
+  return h(Dashboard,{email,onOut:out});
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>
+</body>
+</html>
