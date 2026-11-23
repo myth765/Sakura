@@ -256,7 +256,7 @@ const BLOSSOM_SVG = '<svg width="28" height="28" viewBox="0 0 240 240" xmlns="ht
   + '</g><circle cx="120" cy="120" r="28" fill="#6D3BD2"/></svg>';
 
 function Logo(){
-  return h('div',{className:'mark'}, h('span',{className:'bud', dangerouslySetInnerHTML:{__html:BLOSSOM_SVG}}), h('span',null,'Sakura'), h('span',{style:{marginLeft:'auto',fontSize:10,opacity:.5}},'v13'));
+  return h('div',{className:'mark'}, h('span',{className:'bud', dangerouslySetInnerHTML:{__html:BLOSSOM_SVG}}), h('span',null,'Sakura'), h('span',{style:{marginLeft:'auto',fontSize:10,opacity:.5}},'v14'));
 }
 function Message({type,children}){
   if(!children) return null;
@@ -666,8 +666,8 @@ function PersonRow({p,onView,sub,children}){
   );
 }
 
-function SwipeTab({active, act, setSheet, hidden, filters}){
-  const fkey = JSON.stringify(filters||{});
+function SwipeTab({active, act, setSheet, hidden, filters, deckKey}){
+  const fkey = JSON.stringify(filters||{})+'|'+(deckKey||0);
   const [deck,setDeck]=useState(null);
   const [dx,setDx]=useState(0); const [fly,setFly]=useState(0);
   const startX=React.useRef(null);
@@ -841,11 +841,11 @@ function SafetySheet({mode, person, me, onClose, onDone}){
   );
 }
 
-function BlockedSheet({onClose, refresh}){
+function BlockedSheet({onClose, refresh, onUnblocked}){
   const [list,setList]=useState(null);
   const load=()=>sb.rpc('get_blocked_users').then(({data})=>setList(data||[]));
   useEffect(()=>{ load(); },[]);
-  async function unblock(id){ await sb.rpc('unblock_user',{p_user:id}); await load(); refresh(); }
+  async function unblock(id){ await sb.rpc('unblock_user',{p_user:id}); await load(); if(onUnblocked) onUnblocked(id); refresh(); }
   return h('div',{className:'sheet top'},
     h('h3',{style:{margin:'20px 0 12px',fontSize:22}},'Blocked users'),
     list===null ? h('div',{className:'meta'},'Loading…')
@@ -913,7 +913,7 @@ function MainApp({data, go}){
   const [seen,setSeen]=useState(new Date((data.profile && data.profile.notif_seen_at) || 0).getTime());
   const [chatWith,setChatWith]=useState(null);
   const [sheet,setSheet]=useState(null); const [pop,setPop]=useState(null);
-  const [safety,setSafety]=useState(null); const [showBlocked,setShowBlocked]=useState(false); const [showTips,setShowTips]=useState(false); const [hidden,setHidden]=useState([]);
+  const [safety,setSafety]=useState(null); const [showBlocked,setShowBlocked]=useState(false); const [showTips,setShowTips]=useState(false); const [hidden,setHidden]=useState([]); const [deckKey,setDeckKey]=useState(0);
   const [filters,setFilters]=useState({bands:(data.profile&&data.profile.filter_age_bands)||[], towns:(data.profile&&data.profile.filter_locations)||[]});
   const [showFilters,setShowFilters]=useState(false);
   const filtersRef=React.useRef(filters); filtersRef.current=filters;
@@ -985,7 +985,7 @@ function MainApp({data, go}){
   const pane=(id,child,flush)=>h('div',{className:'main'+(flush?' flush':''),style:{display: tab===id?'flex':'none'}}, child);
   return h('div',{className:'shell'},
     h('div',{className:'top'},'🌸 Sakura', (tab==='swipe'||tab==='notif') ? h('button',{className:'fbtn',onClick:()=>setShowFilters(true)},'Filters'+((filters.bands.length+filters.towns.length)?' ('+(filters.bands.length+filters.towns.length)+')':'')) : null),
-    pane('swipe', h(SwipeTab,{active:tab==='swipe',act,setSheet,hidden,filters})),
+    pane('swipe', h(SwipeTab,{active:tab==='swipe',act,setSheet,hidden,filters,deckKey})),
     pane('notif', h(NotifTab,{inbox,act,openChat,setSheet,active:tab==='notif'})),
     pane('chat', h(ChatTab,{inbox,me,chatWith,setChatWith,setSheet,refresh,onSafety:(k,p)=>setSafety({mode:k,person:p}),showTip:!tipSeen,dismissTip}), !!chatWith),
     pane('you', h(YouTab,{data,go,openBlocked:()=>setShowBlocked(true),openTips:()=>setShowTips(true),openLegal:()=>setShowLegal(true)})),
@@ -998,7 +998,7 @@ function MainApp({data, go}){
       h('p',null,'You and '+pop.display_name+' liked each other. You are now friends.'),
       h('button',{className:'btn',onClick:()=>{setPop(null); openChat(pop);}},'Start chatting'),
       h('button',{className:'btn ghost',onClick:()=>setPop(null)},'Keep swiping')) : null,
-    showBlocked ? h(BlockedSheet,{onClose:()=>setShowBlocked(false),refresh}) : null,
+    showBlocked ? h(BlockedSheet,{onClose:()=>setShowBlocked(false),refresh,onUnblocked:(id)=>{ setHidden(h0=>h0.filter(x=>x!==id)); setDeckKey(k=>k+1); }}) : null,
     showTips ? h(TipsSheet,{onClose:()=>setShowTips(false)}) : null,
     showFilters ? h(FilterSheet,{filters,onApply:applyFilters,onClose:()=>setShowFilters(false)}) : null,
     showLegal ? h('div',{className:'sheet top'}, h('h3',{style:{margin:'20px 0 12px',fontSize:22}},'Terms and Privacy'), h(LegalBody), h('div',{style:{flex:1}}), h('button',{className:'btn',style:{marginTop:12},onClick:()=>setShowLegal(false)},'Close')) : null,
