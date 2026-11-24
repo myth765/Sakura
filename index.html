@@ -216,6 +216,21 @@
   .chips{display:flex; flex-wrap:wrap; gap:8px; margin:6px 0 10px;}
   .chip{border:1.5px solid #DCD8EA; background:#fff; color:#1F1B2E; border-radius:999px; padding:8px 14px; font-family:inherit; font-size:13.5px; cursor:pointer;}
   .chip.on{background:linear-gradient(135deg,#9B5CFF,#6D3BD2); color:#fff; border-color:transparent;}
+  .sw-top{display:flex; align-items:center; justify-content:space-between; gap:8px; margin:0 0 10px;}
+  .chip-info{background:#F3EEFF; color:#4B2BB5; border-radius:999px; padding:6px 12px; font-size:12.5px;}
+  .boostbtn{border:none; border-radius:999px; padding:7px 13px; font-size:12.5px; font-weight:600; font-family:inherit; cursor:pointer; background:linear-gradient(135deg,#F5B942,#E8A317); color:#fff;}
+  .boostbtn.locked{background:#ECE9F5; color:#6B6880;}
+  .round.sm{width:52px; height:52px; font-size:20px; align-self:center;}
+  .round.undo{background:#F1EFF7; color:#6D3BD2;}
+  .round.super{background:linear-gradient(135deg,#F5B942,#E8A317);}
+  .round.locked{opacity:.55;}
+  .acts{align-items:center;}
+  .mini.blurred{filter:blur(5px); background:linear-gradient(135deg,#C7B6F7,#8B5CF6);}
+  .blurtxt{filter:blur(5px); user-select:none;}
+  .blurrow{cursor:pointer;}
+  .lockic{font-size:18px;}
+  .toast{position:absolute; left:14px; right:14px; top:64px; z-index:40; background:#1F1B2E; color:#fff; border-radius:12px; padding:11px 14px; font-size:13.5px; box-shadow:0 8px 24px rgba(31,27,46,.3);}
+  .perks{list-style:none; padding:0; margin:12px 0; text-align:left;} .perks li{padding:6px 0 6px 26px; position:relative;} .perks li::before{content:'✓'; position:absolute; left:0; color:#6D3BD2; font-weight:700;}
   .shell .btn{background:linear-gradient(135deg,#9B5CFF,#6D3BD2); box-shadow:none;}
   .shell .btn.ghost{background:none; border:1.5px solid #DCD8EA; color:#6D3BD2;}
 </style>
@@ -256,7 +271,7 @@ const BLOSSOM_SVG = '<svg width="28" height="28" viewBox="0 0 240 240" xmlns="ht
   + '</g><circle cx="120" cy="120" r="28" fill="#6D3BD2"/></svg>';
 
 function Logo(){
-  return h('div',{className:'mark'}, h('span',{className:'bud', dangerouslySetInnerHTML:{__html:BLOSSOM_SVG}}), h('span',null,'Sakura'), h('span',{style:{marginLeft:'auto',fontSize:10,opacity:.5}},'v14'));
+  return h('div',{className:'mark'}, h('span',{className:'bud', dangerouslySetInnerHTML:{__html:BLOSSOM_SVG}}), h('span',null,'Sakura'), h('span',{style:{marginLeft:'auto',fontSize:10,opacity:.5}},'v15'));
 }
 function Message({type,children}){
   if(!children) return null;
@@ -666,13 +681,30 @@ function PersonRow({p,onView,sub,children}){
   );
 }
 
-function SwipeTab({active, act, setSheet, hidden, filters, deckKey}){
+function UpsellSheet({kind, onClose}){
+  const t = {
+    limit: ["You've used your 15 likes today", 'Your likes come back at midnight, Zambia time. Premium gives you unlimited likes.'],
+    super_limit: ["You've used your 5 super likes today", 'They come back at midnight, Zambia time.'],
+    likes: ['See who liked you', 'Premium members see the name and photos of everyone who liked them.'],
+    premium: ['This is a Premium feature', 'Premium members get these extras:']
+  }[kind] || ['Premium', ''];
+  return h('div',{className:'sheet top center',style:{textAlign:'center'}},
+    h('div',{style:{fontSize:44}},'⭐'),
+    h('h3',{style:{fontSize:22,margin:'6px 0'}},t[0]),
+    h('p',{style:{color:'#5E5A73',lineHeight:1.5,margin:0}},t[1]),
+    h('ul',{className:'perks'}, ['Unlimited likes','See who liked you','Undo your last swipe','5 super likes a day','3 boosts a day (shown first for 30 minutes)'].map(x=>h('li',{key:x},x))),
+    h('button',{className:'btn',disabled:true,style:{opacity:.6}},'Premium is coming soon'),
+    h('button',{className:'btn ghost',style:{marginTop:10},onClick:onClose},'Close'));
+}
+
+function SwipeTab({active, act, setSheet, hidden, filters, deckKey, prem, onUpsell, onUndo, onBoost}){
   const fkey = JSON.stringify(filters||{})+'|'+(deckKey||0);
   const [deck,setDeck]=useState(null);
   const [dx,setDx]=useState(0); const [fly,setFly]=useState(0);
   const startX=React.useRef(null);
   const list = deck && deck.filter(c=>!(hidden||[]).includes(c.id));
   const empty = list===null || list.length===0;
+  const locksOn = !!(prem && prem.locks_on); const free = locksOn && !prem.access;
   useEffect(()=>{
     if(!active || !empty) return;
     const load=()=>sb.rpc('get_discover_profiles', filterArgs(filters)).then(({data})=>setDeck(data||[]));
@@ -681,13 +713,22 @@ function SwipeTab({active, act, setSheet, hidden, filters, deckKey}){
     return ()=>clearInterval(t);
   },[active,empty,fkey]);
   useEffect(()=>{ setDeck(null); },[fkey]);
-  function decide(action){
+  function decide(action, sup){
     const c = list && list[0]; if(!c || fly) return;
+    if(action==='like' && free && prem.likes_used >= prem.likes_limit){ onUpsell('limit'); setDx(0); return; }
+    if(sup && free){ onUpsell('premium'); setDx(0); return; }
+    if(sup && locksOn && prem.supers_used >= prem.supers_limit){ onUpsell('super_limit'); setDx(0); return; }
     setFly(action==='like'?1:-1);
-    setTimeout(()=>{
-      act(c.id, action==='like'?'like':'pass');
-      setDeck(d=>d.slice(1)); setFly(0); setDx(0);
+    setTimeout(async ()=>{
+      const res = await act(c.id, action, 'swipe', !!sup);
+      if(res && res.error){ setFly(0); setDx(0); return; }
+      setDeck(d=>(d||[]).filter(x=>x.id!==c.id)); setFly(0); setDx(0);
     },220);
+  }
+  async function undo(){
+    if(free){ onUpsell('premium'); return; }
+    const card = await onUndo();
+    if(card) setDeck(d=>[card].concat((d||[]).filter(x=>x.id!==card.id)));
   }
   function down(e){ startX.current=e.clientX; e.currentTarget.setPointerCapture(e.pointerId); }
   function move(e){ if(startX.current!==null) setDx(e.clientX-startX.current); }
@@ -696,12 +737,21 @@ function SwipeTab({active, act, setSheet, hidden, filters, deckKey}){
     if(dx>90) decide('like'); else if(dx<-90) decide('pass');
     else { if(Math.abs(dx)<6) setSheet(list[0]); setDx(0); }
   }
-  if(list===null) return h(Empty,{title:'Finding people…',text:''});
+  const boostTime = prem && prem.boost_ends_at ? new Date(prem.boost_ends_at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : null;
+  const info = !prem ? '' : free ? ('Likes left today: '+Math.max(0,prem.likes_limit-prem.likes_used)+' of '+prem.likes_limit)
+    : locksOn ? ('Super likes left: '+Math.max(0,prem.supers_limit-prem.supers_used)+' · Boosts left: '+Math.max(0,prem.boosts_limit-prem.boosts_used))
+    : 'All premium features are unlocked for testing';
+  const topRow = h('div',{className:'sw-top'}, h('span',{className:'chip-info'},info),
+    h('button',{className:'boostbtn'+(free?' locked':''),onClick:onBoost}, boostTime ? 'Boosted until '+boostTime : (free?'Boost (Premium)':'Boost')));
+  const col = {display:'flex',flexDirection:'column',flex:1};
+  if(list===null) return h('div',{style:col}, topRow, h(Empty,{title:'Finding people…',text:''}));
   const c = list[0];
-  if(!c) return h(Empty,{title:"You're all caught up",text:'No one new right now. New people show up here automatically.'},
-    h('button',{className:'btn sm',style:{marginTop:10},onClick:()=>setDeck(null)},'Refresh'));
+  if(!c) return h('div',{style:col}, topRow, h(Empty,{title:"You're all caught up",text:'No one new right now. New people show up here automatically.'},
+    h('div',{className:'btns',style:{display:'flex',gap:8,marginTop:10}},
+      h('button',{className:'btn sm',onClick:()=>setDeck(null)},'Refresh'),
+      h('button',{className:'btn sm ghost',onClick:undo},'Undo last swipe'+(free?' (Premium)':'')))));
   const x = fly ? fly*480 : dx;
-  return h('div',{style:{display:'flex',flexDirection:'column',flex:1}},
+  return h('div',{style:col}, topRow,
     h('div',{className:'deck'},
       h('div',{className:'pcard'+(c.avatar_url?' has-img':''), onPointerDown:down, onPointerMove:move, onPointerUp:up, onPointerCancel:up,
         style:{backgroundImage: c.avatar_url ? 'url('+c.avatar_url+')' : undefined, backgroundSize:'cover', backgroundPosition:'center', transform:'translateX('+x+'px) rotate('+(x/18)+'deg)', transition: startX.current===null ? 'transform .22s ease' : 'none'}},
@@ -713,28 +763,38 @@ function SwipeTab({active, act, setSheet, hidden, filters, deckKey}){
       )
     ),
     h('div',{className:'acts'},
+      h('button',{className:'round sm undo'+(free?' locked':''),onClick:undo,'aria-label':'Undo last swipe'},'↶'),
       h('button',{className:'round no',onClick:()=>decide('pass'),'aria-label':'Dislike'},'✕'),
-      h('button',{className:'round yes',onClick:()=>decide('like'),'aria-label':'Like'},'♥')
+      h('button',{className:'round yes',onClick:()=>decide('like'),'aria-label':'Like'},'♥'),
+      h('button',{className:'round sm super'+(free?' locked':''),onClick:()=>decide('like',true),'aria-label':'Super like'},'★')
     )
   );
 }
 
-function NotifTab({inbox, act, openChat, setSheet, active}){
+function NotifTab({inbox, act, openChat, setSheet, active, onUpsell}){
   const [busy,setBusy]=useState(''); const [sub,setSub]=useState('likes');
   useEffect(()=>{ if(active) setSub('likes'); },[active]);
-  async function go(id,a){ setBusy(id); await act(id,a); setBusy(''); }
+  async function go(id,a,src){ setBusy(id); await act(id,a,src); setBusy(''); }
+  const lockedRows=inbox.likes.filter(l=>l.locked); const openRows=inbox.likes.filter(l=>!l.locked);
   const recent=inbox.matches.filter(m=>Date.now()-new Date(m.matched_at).getTime() < 7*864e5);
-  const sugg=inbox.sugg.filter(s=>!inbox.likes.some(l=>l.id===s.id));
+  const sugg=inbox.sugg.filter(s=>!inbox.likes.some(l=>l.id && l.id===s.id));
   const none=(t)=>h('div',{className:'empty',style:{padding:'40px 10px'}},t);
   let body;
-  if(sub==='likes') body = inbox.likes.length ? inbox.likes.map(p=>h(PersonRow,{key:p.id,p,onView:()=>setSheet(p),sub:'Liked you · '+fmtTime(p.liked_at)},
-      h('button',{className:'btn sm',disabled:busy===p.id,onClick:()=>go(p.id,'like')},'Like back'),
-      h('button',{className:'btn sm ghost',disabled:busy===p.id,onClick:()=>go(p.id,'pass')},'Pass'))) : none('No new likes yet. When someone likes you, they show up here.');
+  if(sub==='likes') body = inbox.likes.length ? [
+      lockedRows.length ? h('div',{key:'hd',className:'sec'}, lockedRows.length+' '+(lockedRows.length===1?'person':'people')+' liked you. Premium shows who.') : null
+    ].concat(lockedRows.map((l,i)=>h('div',{key:'l'+i,className:'row-item blurrow',onClick:()=>onUpsell('likes')},
+      h('div',{className:'mini blurred',style:{width:48,height:48,fontSize:20}},'?'),
+      h('div',{className:'ri-info'}, h('b',{className:'blurtxt'},'Hidden person, 25'), h('div',{className:'meta blurtxt'},'Somewhere in Zambia · Friendship')),
+      h('span',{className:'lockic'},'🔒')))
+    ).concat(openRows.map(p=>h(PersonRow,{key:p.id,p,onView:()=>setSheet(p),sub:(p.is_super?'★ Super liked you · ':'Liked you · ')+fmtTime(p.liked_at)},
+      h('button',{className:'btn sm',disabled:busy===p.id,onClick:()=>go(p.id,'like','likes')},'Like back'),
+      h('button',{className:'btn sm ghost',disabled:busy===p.id,onClick:()=>go(p.id,'pass','likes')},'Pass'))))
+    : none('No new likes yet. When someone likes you, they show up here.');
   else if(sub==='matches') body = recent.length ? [h('div',{key:'hint',className:'meta',style:{margin:'0 2px 8px'}},'Matches from the last 7 days. Older ones stay in Chat.')].concat(recent.map(m=>h(PersonRow,{key:m.match_id,p:m,onView:()=>setSheet(m),sub:m.last_body?'Last message: '+m.last_body:"It's a match! Say hi."},
       h('button',{className:'btn sm',onClick:()=>openChat(m)},m.last_body?'Open chat':'Start chatting')))) : none('No matches in the last 7 days.');
   else body = sugg.length ? sugg.map(p=>h(PersonRow,{key:p.id,p,onView:()=>setSheet(p)},
-      h('button',{className:'btn sm',disabled:busy===p.id,onClick:()=>go(p.id,'like')},'Like'),
-      h('button',{className:'btn sm ghost',disabled:busy===p.id,onClick:()=>go(p.id,'pass')},'Dismiss'))) : none('No suggestions right now. Check back soon.');
+      h('button',{className:'btn sm',disabled:busy===p.id,onClick:()=>go(p.id,'like','suggestion')},'Like'),
+      h('button',{className:'btn sm ghost',disabled:busy===p.id,onClick:()=>go(p.id,'pass','suggestion')},'Dismiss'))) : none('No suggestions right now. Check back soon.');
   const tab=(id,label,n)=>h('button',{className:sub===id?'on':'',onClick:()=>setSub(id)}, label+(n?' ('+n+')':''));
   return h('div',null,
     h('div',{className:'seg'}, tab('likes','Likes',inbox.likes.length), tab('matches','Matches',recent.length), tab('sugg','Suggestions',sugg.length)),
@@ -921,6 +981,8 @@ function MainApp({data, go}){
   function dismissTip(){ setTipSeen(true); sb.from('profiles').update({chat_tip_seen:true}).eq('id',me.id); }
   const inboxRef=React.useRef(inbox); inboxRef.current=inbox;
   const tickRef=React.useRef(0); const [warns,setWarns]=useState([]);
+  const [prem,setPrem]=useState(null); const [upsell,setUpsell]=useState(null); const [toast,setToast]=useState('');
+  useEffect(()=>{ if(!toast) return; const t=setTimeout(()=>setToast(''),3800); return ()=>clearTimeout(t); },[toast]);
   async function ackWarn(id){ setWarns(w=>w.filter(x=>x.id!==id)); await sb.rpc('acknowledge_warning',{p_id:id}); }
   useEffect(()=>{ document.body.classList.add('app-mode'); return ()=>document.body.classList.remove('app-mode'); },[]);
 
@@ -933,8 +995,10 @@ function MainApp({data, go}){
         return inboxRef.current;
       }
     }
-    const [l,m,s,wn] = await Promise.all([sb.rpc('get_likes_received'), sb.rpc('get_my_matches'), sb.rpc('get_suggestions', filterArgs(filtersRef.current)),
-      sb.from('warnings').select('*').eq('user_id',me.id).is('acknowledged_at',null).order('created_at',{ascending:true})]);
+    const [l,m,s,wn,ps] = await Promise.all([sb.rpc('get_likes_received'), sb.rpc('get_my_matches'), sb.rpc('get_suggestions', filterArgs(filtersRef.current)),
+      sb.from('warnings').select('*').eq('user_id',me.id).is('acknowledged_at',null).order('created_at',{ascending:true}),
+      sb.rpc('get_premium_state')]);
+    if(!ps.error && ps.data) setPrem(ps.data);
     if(!wn.error) setWarns(wn.data||[]);
     const prev = inboxRef.current;
     const st = {likes:l.error?prev.likes:(l.data||[]), matches:m.error?prev.matches:(m.data||[]), sugg:s.error?prev.sugg:(s.data||[])};
@@ -950,12 +1014,46 @@ function MainApp({data, go}){
     return ()=>{ clearInterval(t); sb.removeChannel(ch); };
   },[]);
 
-  async function act(target, action){
-    const { error } = await sb.from('swipes').upsert({swiper_id:me.id,target_id:target,action,created_at:new Date().toISOString()},{onConflict:'swiper_id,target_id'});
-    if(error) return;
-    const st = await refresh();
-    const m = st.matches.find(x=>x.other_id===target);
-    if(action==='like' && m) setPop(m);
+  async function act(target, action, source, sup){
+    const { data, error } = await sb.rpc('swipe',{p_target:target,p_action:action,p_source:source||'swipe',p_super:!!sup});
+    if(error){
+      const m = error.message||'';
+      if(/LIKE_LIMIT_REACHED/.test(m)){ setUpsell('limit'); return {error:'LIKE_LIMIT'}; }
+      if(/SUPER_LIMIT_REACHED/.test(m)){ setUpsell('super_limit'); return {error:'SUPER_LIMIT'}; }
+      if(/PREMIUM_REQUIRED/.test(m)){ setUpsell('premium'); return {error:'PREMIUM'}; }
+      setToast('Something went wrong. Please try again.'); return {error:'OTHER'};
+    }
+    if(data) setPrem(data);
+    refresh().then(st=>{ const mt = st && st.matches.find(x=>x.other_id===target); if(action==='like' && mt) setPop(mt); });
+    return {ok:true};
+  }
+  async function doUndo(){
+    const { data, error } = await sb.rpc('undo_last_swipe');
+    if(error){
+      const m = error.message||'';
+      if(/PREMIUM_REQUIRED/.test(m)) setUpsell('premium');
+      else if(/NOTHING_TO_UNDO/.test(m)) setToast('There is nothing to undo.');
+      else if(/UNDO_MATCHED/.test(m)) setToast('That like became a match, so it cannot be undone. To end it, unmatch or block them.');
+      else setToast('Could not undo. Please try again.');
+      return null;
+    }
+    if(data && data.state) setPrem(data.state);
+    refresh();
+    return data ? data.card : null;
+  }
+  async function doBoost(){
+    if(prem && prem.locks_on && !prem.access){ setUpsell('premium'); return; }
+    const { data, error } = await sb.rpc('use_boost');
+    if(error){
+      const m = error.message||'';
+      if(/PREMIUM_REQUIRED/.test(m)) setUpsell('premium');
+      else if(/BOOST_ACTIVE/.test(m)) setToast('Your boost is already running.');
+      else if(/BOOST_LIMIT_REACHED/.test(m)) setToast('You have used all 3 boosts today. They come back at midnight, Zambia time.');
+      else setToast('Could not start the boost. Please try again.');
+      return;
+    }
+    if(data) setPrem(data);
+    setToast('Boost started. You will be shown first for 30 minutes.');
   }
   const unseen = inbox.likes.filter(l=>new Date(l.liked_at).getTime()>seen).length + inbox.matches.filter(m=>!m.last_body && new Date(m.matched_at).getTime()>seen).length;
   const unread = inbox.matches.reduce((n,m)=>n+m.unread,0);
@@ -985,8 +1083,8 @@ function MainApp({data, go}){
   const pane=(id,child,flush)=>h('div',{className:'main'+(flush?' flush':''),style:{display: tab===id?'flex':'none'}}, child);
   return h('div',{className:'shell'},
     h('div',{className:'top'},'🌸 Sakura', (tab==='swipe'||tab==='notif') ? h('button',{className:'fbtn',onClick:()=>setShowFilters(true)},'Filters'+((filters.bands.length+filters.towns.length)?' ('+(filters.bands.length+filters.towns.length)+')':'')) : null),
-    pane('swipe', h(SwipeTab,{active:tab==='swipe',act,setSheet,hidden,filters,deckKey})),
-    pane('notif', h(NotifTab,{inbox,act,openChat,setSheet,active:tab==='notif'})),
+    pane('swipe', h(SwipeTab,{active:tab==='swipe',act,setSheet,hidden,filters,deckKey,prem,onUpsell:setUpsell,onUndo:doUndo,onBoost:doBoost})),
+    pane('notif', h(NotifTab,{inbox,act,openChat,setSheet,active:tab==='notif',onUpsell:setUpsell})),
     pane('chat', h(ChatTab,{inbox,me,chatWith,setChatWith,setSheet,refresh,onSafety:(k,p)=>setSafety({mode:k,person:p}),showTip:!tipSeen,dismissTip}), !!chatWith),
     pane('you', h(YouTab,{data,go,openBlocked:()=>setShowBlocked(true),openTips:()=>setShowTips(true),openLegal:()=>setShowLegal(true)})),
     h('div',{className:'nav'}, tabs.map(([id,icon,label,n,dot])=>h('button',{key:id,className:tab===id?'on':'',onClick:()=>setTab(id)},
@@ -1003,6 +1101,8 @@ function MainApp({data, go}){
     showFilters ? h(FilterSheet,{filters,onApply:applyFilters,onClose:()=>setShowFilters(false)}) : null,
     showLegal ? h('div',{className:'sheet top'}, h('h3',{style:{margin:'20px 0 12px',fontSize:22}},'Terms and Privacy'), h(LegalBody), h('div',{style:{flex:1}}), h('button',{className:'btn',style:{marginTop:12},onClick:()=>setShowLegal(false)},'Close')) : null,
     safety ? h(SafetySheet,{mode:safety.mode,person:safety.person,me,onClose:()=>setSafety(null),onDone:safetyDone}) : null,
+    upsell ? h(UpsellSheet,{kind:upsell,onClose:()=>setUpsell(null)}) : null,
+    toast ? h('div',{className:'toast',onClick:()=>setToast('')},toast) : null,
     warns.length ? h('div',{className:'sheet top center'},
       h('h3',{style:{fontSize:22}},'A message from Sakura'),
       h('span',{className:'tag'},warns[0].violation),
