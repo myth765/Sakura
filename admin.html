@@ -59,7 +59,7 @@
 <script>
 const h = React.createElement;
 const { useState, useEffect, useCallback } = React;
-const ADMIN_VERSION = 'admin v2';
+const ADMIN_VERSION = 'admin v3';
 const sb = window.supabase.createClient(
   'https://nnlrogdehrmdgyarxyhz.supabase.co',
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ubHJvZ2RlaHJtZGd5YXJ4eWh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA0NTA1MTUsImV4cCI6MjEwNjAyNjUxNX0.UToKAdLrTF8its_opVsNxqnmT1_-MKO1bKQ5hEyKZNA');
@@ -77,7 +77,7 @@ const VIOL = {
   'Contact details in profile': 'Please remove contact details from your profile. You can share them privately in chat after you match.',
   'Other': ''
 };
-const ACTION_NAMES = { viewed_report:'Viewed a report', report_resolved:'Resolved a report', report_dismissed:'Dismissed a report', report_open:'Reopened a report', warned:'Sent a warning', deleted_account:'Deleted an account', banned_forever:'Banned forever', unbanned:'Removed a ban', removed_photo:'Removed a photo', premium_locks_on:'Turned premium locks ON', premium_locks_off:'Turned premium locks OFF', premium_granted:'Gave premium', premium_removed:'Removed premium' };
+const ACTION_NAMES = { viewed_report:'Viewed a report', report_resolved:'Resolved a report', report_dismissed:'Dismissed a report', report_open:'Reopened a report', warned:'Sent a warning', deleted_account:'Deleted an account', banned_forever:'Banned forever', unbanned:'Removed a ban', removed_photo:'Removed a photo', premium_locks_on:'Turned premium locks ON', premium_locks_off:'Turned premium locks OFF', premium_granted:'Gave premium', premium_removed:'Removed premium', payment_paid:'Payment received', payment_marked_paid:'Marked a payment paid', payment_marked_failed:'Marked a payment failed', plan_updated:'Changed a plan', payment_provider_none:'Payments provider: none', payment_provider_demo:'Payments provider: DEMO', payment_provider_flutterwave:'Payments provider: Flutterwave' };
 
 const fmt = (t) => t ? new Date(t).toLocaleString([], {dateStyle:'medium', timeStyle:'short'}) : '-';
 async function rpc(name, args){ const { data, error } = await sb.rpc(name, args || {}); if(error) throw new Error(error.message); return data; }
@@ -316,7 +316,15 @@ function PremiumTab({openUser}){
     try{ await rpc('admin_set_locks',{p_on:on}); reload(); }catch(e){ setErr(e.message); } setBusy(false);
   }
   async function remove(id,label){ if(!window.confirm('Remove premium from '+label+'?')) return; try{ await rpc('admin_revoke_premium',{p_user:id}); reloadList(); }catch(e){ setErr(e.message); } }
+  async function setProvider(p){
+    const msg = p==='demo' ? 'Switch to DEMO payments?\n\nFake payments will succeed by themselves and give premium for free. Use this only for testing, never for real customers.'
+      : p==='flutterwave' ? 'Switch to real Flutterwave payments?\n\nOnly do this after the Flutterwave keys are set up in Supabase.'
+      : 'Turn payments off? Customers will see that payments are coming soon.';
+    if(!window.confirm(msg)) return; setBusy(true); setErr('');
+    try{ await rpc('admin_set_payment_provider',{p_provider:p}); reload(); }catch(e){ setErr(e.message); } setBusy(false);
+  }
   const on = st.data && st.data.premium_locks_on;
+  const prov = st.data && st.data.payments_provider;
   return h('div',null, h('h2',null,'Premium'),
     h(Loading,{st}), h(Msg,{type:'err'},err),
     st.data ? h('div',{className:'card'},
@@ -326,6 +334,13 @@ function PremiumTab({openUser}){
         h('span',{className:'badge '+(on?'green':'amber')},on?'ON':'OFF')),
       h('div',{className:'btns'}, h('button',{className:'btn'+(on?' ghost':''),disabled:busy,onClick:toggle},on?'Turn locks OFF':'Turn locks ON')),
       h('div',{className:'meta',style:{marginTop:10}},'This switch is only for the testing phase. When testing ends, it will be removed and the locks will stay on for good.')) : null,
+    st.data ? h('div',{className:'card'},
+      h('h3',null,'Payments'),
+      h('div',{className:'meta'},'Customers can pay only when the premium locks are ON and a provider is chosen here.'),
+      h('div',{className:'row',style:{margin:'8px 0'}}, h('span',{className:'badge '+(prov==='flutterwave'?'green':prov==='demo'?'amber':'')}, 'Now: '+(prov==='flutterwave'?'Flutterwave (real money)':prov==='demo'?'DEMO (fake money)':'None')),
+        h('span',{className:'badge '+(on&&prov!=='none'?'green':'')}, on&&prov!=='none'?'Open to customers':'Closed to customers')),
+      prov==='demo' ? h(Msg,{type:'err'},'Demo mode is on. Fake payments succeed automatically and give premium for free. Switch it off before real customers arrive.') : null,
+      h('div',{className:'btns'}, ['none','demo','flutterwave'].map(p=>h('button',{key:p,className:'btn sm'+(prov===p?'':' ghost'),disabled:busy||prov===p,onClick:()=>setProvider(p)},p==='none'?'No payments':p==='demo'?'Demo':'Flutterwave')))) : null,
     h('h2',null,'Premium members'),
     h('div',{className:'meta'},'To give someone premium, open them in the Users tab.'),
     st.data && lst.loading ? h('div',{className:'meta',style:{padding:10}},'Loading...') : null,
@@ -344,6 +359,43 @@ function PremiumCard({id}){
     d ? h('div',null, h('div',null, d.premium_until ? h('span',{className:'badge green'},'Active until '+fmt(d.premium_until)) : h('span',{className:'badge'},'Not premium')),
       h('div',{className:'meta',style:{marginTop:6}},'Today: '+d.likes_today+' likes counted, '+d.supers_today+' super likes, '+d.boosts_today+' boosts'),
       h('div',{className:'btns'}, [7,30,90].map(n=>h('button',{key:n,className:'btn sm',onClick:()=>give(n)},'Give '+n+' days')), h('button',{className:'btn ghost sm',onClick:custom},'Custom days'), d.premium_until ? h('button',{className:'btn ghost sm',onClick:remove},'Remove premium') : null)) : null);
+}
+
+/* ---------- payments ---------- */
+function Payments({openUser}){
+  const [status,setStatus]=useState('all');
+  const [st,reload]=useLoad(()=>rpc('admin_list_payments',{p_status:status}),[status]);
+  const [cn,reloadCn]=useLoad(()=>rpc('admin_payment_counts'),[]);
+  const [pl,reloadPl]=useLoad(()=>rpc('admin_list_plans'),[]);
+  const [err,setErr]=useState('');
+  async function mark(p,paid){
+    const q = paid ? 'Mark this payment as PAID?\n\nOnly do this if the Flutterwave dashboard shows this exact payment as successful. It gives the person premium.' : 'Mark this payment as failed?';
+    if(!window.confirm(q)) return; const note=window.prompt('Note (optional):','')||'';
+    try{ await rpc('admin_mark_payment',{p_id:p.id,p_paid:paid,p_note:note}); reload(); reloadCn(); }catch(e){ setErr(e.message); }
+  }
+  async function editPrice(p){
+    const v=window.prompt('New price in kwacha for the '+p.name+' plan:', String(Number(p.price))); if(v===null) return;
+    const n=Number(v); if(!n||n<=0){ setErr('Enter a price above 0.'); return; }
+    try{ await rpc('admin_update_plan',{p_id:p.id,p_price:n,p_active:p.active}); reloadPl(); }catch(e){ setErr(e.message); }
+  }
+  async function togglePlan(p){ try{ await rpc('admin_update_plan',{p_id:p.id,p_price:p.price,p_active:!p.active}); reloadPl(); }catch(e){ setErr(e.message); } }
+  const c=cn.data;
+  return h('div',null, h('h2',null,'Payments'), h(Msg,{type:'err'},err),
+    c ? h('div',{className:'grid'}, [['Real payments received',c.paid_count],['Total received (K)',Number(c.paid_total).toFixed(2)],['Waiting now',c.pending],['Demo payments (fake)',c.demo_paid]].map(([k,v])=>h('div',{key:k,className:'stat'},h('b',null,v),h('span',null,k)))) : null,
+    h('h2',null,'Plans and prices'),
+    (pl.data||[]).map(p=>h('div',{key:p.id,className:'card'}, h('div',{className:'row'}, h('div',{className:'sp'},h('b',null,p.name+' · K'+Number(p.price)),h('div',{className:'meta'},p.days+' day'+(p.days>1?'s':'')+' of premium'+(p.active?'':' · hidden from customers'))),
+      h('button',{className:'btn ghost sm',onClick:()=>editPrice(p)},'Change price'), h('button',{className:'btn ghost sm',onClick:()=>togglePlan(p)},p.active?'Hide':'Show')))),
+    h('h2',null,'All payments'),
+    h('div',{className:'tabs',style:{padding:'0 0 8px'}}, ['all','paid','pending','failed','expired'].map(s=>h('button',{key:s,className:'tab'+(status===s?' on':''),onClick:()=>setStatus(s)},s[0].toUpperCase()+s.slice(1)))),
+    h(Loading,{st}),
+    st.data && !st.data.length ? h('div',{className:'meta',style:{padding:10}},'No payments yet.') : null,
+    (st.data||[]).map(p=>h('div',{key:p.id,className:'card'},
+      h('div',{className:'row'}, h('div',{className:'sp'}, h('b',null,p.plan_name+' · K'+Number(p.amount)+(p.provider==='demo'?' (DEMO)':'')), h('div',{className:'meta',style:{overflowWrap:'anywhere'}},p.user_label||'(deleted account)')),
+        h('span',{className:'badge '+(p.status==='paid'?'green':p.status==='pending'?'amber':'red')},p.status)),
+      h('div',{className:'meta'},p.network+' '+p.phone+' · '+fmt(p.created_at)), h('div',{className:'meta',style:{overflowWrap:'anywhere'}},'Ref: '+p.tx_ref+(p.provider_ref?' · Provider: '+p.provider_ref:'')),
+      p.failure_reason ? h('div',{style:{marginTop:4}},p.failure_reason) : null, p.note ? h('div',{className:'meta'},'Note: '+p.note) : null,
+      p.status!=='paid' ? h('div',{className:'btns'}, h('button',{className:'btn sm',onClick:()=>mark(p,true)},'Mark paid'), p.status==='pending' ? h('button',{className:'btn ghost sm',onClick:()=>mark(p,false)},'Mark failed') : null) : null,
+      p.user_exists && p.user_id ? h('div',{className:'btns'},h('button',{className:'btn ghost sm',onClick:()=>openUser(p.user_id)},'Open person')) : null)));
 }
 
 /* ---------- banned list and activity log ---------- */
@@ -367,11 +419,11 @@ function Dashboard({email,onOut}){
   const [tab,setTab]=useState('overview'); const [view,setView]=useState(null);
   const [st]=useLoad(()=>rpc('admin_stats'),[]);
   const openReport=(id)=>{ setView({t:'report',id}); }; const openUser=(id)=>{ setView({t:'user',id}); };
-  const tabs=[['overview','Overview'],['reports','Reports'+(st.data&&st.data.open_reports?' ('+st.data.open_reports+')':'')],['users','Users'],['premium','Premium'],['banned','Banned'],['log','Log']];
+  const tabs=[['overview','Overview'],['reports','Reports'+(st.data&&st.data.open_reports?' ('+st.data.open_reports+')':'')],['users','Users'],['premium','Premium'],['payments','Payments'],['banned','Banned'],['log','Log']];
   let body;
   if(view && view.t==='report') body=h(ReportDetail,{id:view.id,onBack:()=>setView(null),openUser});
   else if(view && view.t==='user') body=h(UserDetail,{id:view.id,onBack:()=>setView(null),openReport});
-  else body = tab==='overview'?h(Overview):tab==='reports'?h(Reports,{openReport}):tab==='users'?h(Users,{openUser}):tab==='premium'?h(PremiumTab,{openUser}):tab==='banned'?h(Banned):h(Log);
+  else body = tab==='overview'?h(Overview):tab==='reports'?h(Reports,{openReport}):tab==='users'?h(Users,{openUser}):tab==='premium'?h(PremiumTab,{openUser}):tab==='payments'?h(Payments,{openUser}):tab==='banned'?h(Banned):h(Log);
   return h('div',null,
     h('header',null, h('div',{className:'in'}, h('b',null,'Sakura Admin'), h('small',null,ADMIN_VERSION), h('span',{className:'sp'}), h('small',{style:{overflowWrap:'anywhere'}},email), h('button',{className:'btn ghost sm',onClick:onOut},'Sign out')),
       h('div',{className:'tabs'}, tabs.map(([id,l])=>h('button',{key:id,className:'tab'+(tab===id&&!view?' on':''),onClick:()=>{ setView(null); setTab(id); }},l)))),

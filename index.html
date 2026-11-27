@@ -231,6 +231,13 @@
   .lockic{font-size:18px;}
   .toast{position:absolute; left:14px; right:14px; top:64px; z-index:40; background:#1F1B2E; color:#fff; border-radius:12px; padding:11px 14px; font-size:13.5px; box-shadow:0 8px 24px rgba(31,27,46,.3);}
   .perks{list-style:none; padding:0; margin:12px 0; text-align:left;} .perks li{padding:6px 0 6px 26px; position:relative;} .perks li::before{content:'✓'; position:absolute; left:0; color:#6D3BD2; font-weight:700;}
+  .plan{display:flex; justify-content:space-between; align-items:center; padding:14px; border:1.5px solid #E8E6F0; border-radius:14px; margin-bottom:10px; cursor:pointer; background:#fff; text-align:left;}
+  .plan.on{border-color:#8B5CF6; background:#F6F1FF;}
+  .plan b{font-size:16px;} .plan .price{font-family:'Quicksand',sans-serif; font-weight:700; font-size:20px; color:#4B2BB5;}
+  .demobar{background:#FFF3DC; color:#8A6113; border-radius:12px; padding:10px 12px; font-size:13px; margin:10px 0; text-align:left;}
+  .spin{width:34px; height:34px; border-radius:50%; border:4px solid #E8E6F0; border-top-color:#8B5CF6; margin:14px auto; animation:sp 1s linear infinite;}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  .pays{width:100%; text-align:left; margin-top:8px;} .pays .row-item{margin-bottom:6px;}
   .shell .btn{background:linear-gradient(135deg,#9B5CFF,#6D3BD2); box-shadow:none;}
   .shell .btn.ghost{background:none; border:1.5px solid #DCD8EA; color:#6D3BD2;}
 </style>
@@ -271,14 +278,14 @@ const BLOSSOM_SVG = '<svg width="28" height="28" viewBox="0 0 240 240" xmlns="ht
   + '</g><circle cx="120" cy="120" r="28" fill="#6D3BD2"/></svg>';
 
 function Logo(){
-  return h('div',{className:'mark'}, h('span',{className:'bud', dangerouslySetInnerHTML:{__html:BLOSSOM_SVG}}), h('span',null,'Sakura'), h('span',{style:{marginLeft:'auto',fontSize:10,opacity:.5}},'v15'));
+  return h('div',{className:'mark'}, h('span',{className:'bud', dangerouslySetInnerHTML:{__html:BLOSSOM_SVG}}), h('span',null,'Sakura'), h('span',{style:{marginLeft:'auto',fontSize:10,opacity:.5}},'v16'));
 }
 function Message({type,children}){
   if(!children) return null;
   return h('div',{className:'msg '+type}, children);
 }
 
-const TERMS_VERSION='2026-11-22';
+const TERMS_VERSION='2026-11-24';
 const CONTACT='phiribernard765@gmail.com';
 const TERMS=[
 ['1. About these Terms',`These Terms of Service ("Terms") are a legal agreement between you and Bernard Phiri, the operator of Sakura ("Sakura", "we", "us" or "our"). They apply to your use of the Sakura website and application and all related services (the "Service"). By creating an account, ticking the agreement box, or using the Service, you confirm that you have read, understood and agree to be bound by these Terms and our Privacy Policy. If you do not agree, do not use the Service.`],
@@ -290,7 +297,7 @@ const TERMS=[
 ['7. Safety and meeting people',`We do not run criminal, identity or background checks on users, and we do not guarantee that any user is who they say they are, even if they have a photo or a verification badge. You are solely responsible for your interactions with other users, online and offline. When meeting someone in person, meet in a public place, tell a friend or family member where you are going, and arrange your own transport. We are not responsible for the conduct of any user, online or offline. If you are in danger, contact the Zambia Police Service or other emergency services immediately.`],
 ['8. Blocking, reporting and enforcement',`You can block, unmatch and report other users at any time. We may review reports and take any action we consider appropriate, including removing content, warning, restricting, suspending or permanently ending accounts, and refusing future access, with or without notice. We may keep and share information with the police, regulators or courts where the law requires it, or where we believe it is necessary to protect any person's safety, prevent crime or protect our rights. We are not obliged to monitor the Service or to act on every report. We may send you a warning, which you must acknowledge in the app before you continue. If we permanently ban an account for serious or repeated breaches, we keep the email address and the reason so that the person cannot register again.`],
 ['9. Availability and changes',`The Service is provided on an "as available" basis and may still be under development. We may add, change, suspend or remove features at any time. We do not promise that the Service will be uninterrupted, secure or free of errors, or that content will never be lost. Do not rely on Sakura as the only place where information that is important to you is kept.`],
-['10. Paid features',`Sakura is currently free to use. If we introduce paid features, the price, billing terms and refund terms will be shown to you before you buy, and they will form part of this agreement for that purchase.`],
+['10. Paid features',`Sakura offers optional paid Premium plans. Prices are shown in Zambian kwacha (ZMW) before you pay. You pay by mobile money (MTN or Airtel) and approve the payment with your PIN on your own phone. Payments are handled by a third-party payment provider. Premium starts when the payment is confirmed and lasts for the plan you bought (one day, one week or one month). Premium does not renew automatically, and buying again adds time to what you have left. Premium is a digital service that begins as soon as your payment is confirmed, so payments are not refundable once Premium is active, except where the law requires a refund or where you were charged by mistake (for example twice). If something goes wrong with a payment, contact us at ${CONTACT} with your payment details and we will put it right. We may change prices, plans, features and free limits; a change never affects a plan you have already paid for.`],
 ['11. Our rights',`The Sakura name, logo, design, software and all content we create belong to us or our licensors and are protected by law. We give you a personal, limited, non-exclusive, non-transferable and revocable permission to use the Service for its intended purpose while you comply with these Terms. You must not copy, modify, reverse engineer, resell or exploit any part of the Service except as the law allows.`],
 ['12. Disclaimers',`To the fullest extent permitted by law, the Service and all content are provided "as is" and "as available", without warranties of any kind, express or implied, including fitness for a particular purpose, accuracy and non-infringement. We do not promise that you will find a match, a friend or a relationship. We do not endorse any user or any user content, and we are not responsible for what users say or do.`],
 ['13. Limits on our liability',`To the fullest extent permitted by law, we and our owners, officers, employees and partners are not liable for any indirect, incidental, special, consequential or punitive loss, for loss of data, profit, reputation or opportunity, or for any loss or harm arising from the acts or omissions of any user, from meetings or dealings between users, or from content posted by users. Our total liability to you for all claims relating to the Service will not exceed ZMW 500. Nothing in these Terms excludes or limits any liability that cannot lawfully be excluded or limited, including liability for fraud or for death or personal injury caused by our negligence, or any consumer rights you have under Zambian law that cannot be waived.`],
@@ -304,13 +311,13 @@ const TERMS=[
 ];
 const PRIVACY=[
 ['1. Who we are',`Sakura, operated by Bernard Phiri ("we", "us"), is the data controller of the personal information described in this policy. This policy explains what information we collect, why we use it, who can see it, and your rights under the Data Protection Act, 2021 of Zambia and other applicable law. Contact: ${CONTACT}.`],
-['2. Information we collect',`Account information: your email address and a password (stored in protected form; we cannot read it), and the version of the Terms you accepted and when. Profile information you provide: display name, date of birth, gender, location (as text you type, such as your city), what you are looking for, bio and photos. Gender, and anything shown in your photos or bio, may reveal sensitive information; you choose what to provide. Activity information: who you like or pass, your matches, the messages you send and receive and whether they were read, people you block, reports you make or that are made about you, and warnings we send you. Technical information: your IP address, browser and device type and basic usage logs, collected by our hosting and infrastructure providers to run and secure the Service. We do not currently collect your precise GPS location.`],
+['2. Information we collect',`Account information: your email address and a password (stored in protected form; we cannot read it), and the version of the Terms you accepted and when. Profile information you provide: display name, date of birth, gender, location (as text you type, such as your city), what you are looking for, bio and photos. Gender, and anything shown in your photos or bio, may reveal sensitive information; you choose what to provide. Activity information: who you like or pass, your matches, the messages you send and receive and whether they were read, people you block, reports you make or that are made about you, and warnings we send you. Technical information: your IP address, browser and device type and basic usage logs, collected by our hosting and infrastructure providers to run and secure the Service. Payment information: the plan you buy, the amount, your mobile money network and phone number, and the reference numbers of the payment. We never see your mobile money PIN. We do not currently collect your precise GPS location.`],
 ['3. How we use your information',`We use it to: create and run your account; show your profile to other users and show you other users; create matches and deliver messages; send emails needed to run your account, such as confirmation and password-reset messages; keep the Service safe, including detecting fake accounts, handling reports and enforcing our Terms; comply with the law and respond to lawful requests; and fix and improve the Service. We do not sell your personal information and we do not show advertising.`],
 ['4. Legal basis',`We process your information because you consent to it when you create an account and complete your profile, because it is necessary to provide the Service you asked for, because we have a legitimate interest in keeping the Service safe and secure, and because the law requires it in some cases. You may withdraw consent at any time by deleting your account, although this does not affect processing already carried out.`],
 ['5. What other users can see',`Other users who are shown to you can see your display name, age (calculated from your date of birth; the date itself is not shown), gender, location text, what you are looking for, bio and photos. Users you match with can also exchange messages with you. Anything you share in a message can be saved or passed on by the other person, so share carefully. Do not put phone numbers or other contact details in your profile.`],
-['6. Who we share information with',`We share information only with: (a) service providers who help us run Sakura, including our database, authentication and file-storage provider (Supabase), our website hosting provider, and our email-delivery provider, who may process the data only on our instructions; (b) the police, courts or regulators where the law requires it or where necessary to prevent harm or crime; and (c) a successor, if the Service is transferred, who must honour this policy. We do not share your information with advertisers or data brokers.`],
+['6. Who we share information with',`We share information only with: (a) service providers who help us run Sakura, including our database, authentication and file-storage provider (Supabase), our website hosting provider, our email-delivery provider, and our payment provider, who may process the data only on our instructions; (b) the police, courts or regulators where the law requires it or where necessary to prevent harm or crime; and (c) a successor, if the Service is transferred, who must honour this policy. We do not share your information with advertisers or data brokers.`],
 ['7. Where information is stored',`Our database and photo storage are hosted with Supabase in the European Union (Ireland region). Your information may therefore be transferred to and processed outside Zambia. We take reasonable steps to make sure our providers protect it to a standard consistent with applicable law.`],
-['8. How long we keep information',`We keep your information while your account exists. When you delete your account in the app, your profile, photos, likes, matches, messages and blocks are removed from our active systems straight away. Limited residual copies may remain in provider logs or backups for a short time before they are overwritten. We may keep information for longer where the law requires it or where it is needed to deal with a legal claim or a safety investigation. Messages you sent to other users may remain with them only if they have saved them. If an account is permanently banned, we keep the email address and the reason for the ban for as long as needed to stop the person registering again. We also keep a record of reports, warnings and moderation actions, including the part of a reported conversation that was saved with the report, for safety and legal purposes.`],
+['8. How long we keep information',`We keep your information while your account exists. When you delete your account in the app, your profile, photos, likes, matches, messages and blocks are removed from our active systems straight away. Limited residual copies may remain in provider logs or backups for a short time before they are overwritten. We may keep information for longer where the law requires it or where it is needed to deal with a legal claim or a safety investigation. Messages you sent to other users may remain with them only if they have saved them. If an account is permanently banned, we keep the email address and the reason for the ban for as long as needed to stop the person registering again. We keep payment records for as long as the law and our accounts require, even if you delete your account. We also keep a record of reports, warnings and moderation actions, including the part of a reported conversation that was saved with the report, for safety and legal purposes.`],
 ['9. Your rights',`Subject to applicable law, you have the right to: know what information we hold about you and receive a copy; correct inaccurate information (you can edit your profile in the app); delete your information (you can delete your account in the app); object to or restrict some processing; withdraw consent; and complain to the Data Protection Commissioner of Zambia. To use a right that you cannot use in the app, contact us at ${CONTACT}. We may need to verify your identity first.`],
 ['10. Security',`We use access controls, encrypted connections and other reasonable technical and organisational safeguards to protect your information. No online service is completely secure, and we cannot guarantee absolute security. If a breach affecting your personal data occurs, we will notify the Data Protection Commissioner and affected users as the law requires.`],
 ['11. Children',`Sakura is for adults only. We do not knowingly collect information from anyone under 18. If we learn that we have, we will delete the account and its data. If you believe a user is under 18, please report them in the app.`],
@@ -324,7 +331,7 @@ function LegalBody({start}){
   const list = doc==='terms' ? TERMS : PRIVACY;
   return h('div',null,
     h('div',{className:'seg'}, h('button',{type:'button',className:doc==='terms'?'on':'',onClick:()=>setDoc('terms')},'Terms of Service'), h('button',{type:'button',className:doc==='privacy'?'on':'',onClick:()=>setDoc('privacy')},'Privacy Policy')),
-    h('div',{className:'legal'}, h('div',{className:'meta'},'Version '+TERMS_VERSION+' · Last updated 22 November 2026'),
+    h('div',{className:'legal'}, h('div',{className:'meta'},'Version '+TERMS_VERSION+' · Last updated 24 November 2026'),
       list.map(([t,body],i)=>h('div',{key:doc+i}, h('h4',null,t), h('p',null,body)))));
 }
 function LegalCard({onBack}){
@@ -681,7 +688,7 @@ function PersonRow({p,onView,sub,children}){
   );
 }
 
-function UpsellSheet({kind, onClose}){
+function UpsellSheet({kind, onClose, payOn, onGet}){
   const t = {
     limit: ["You've used your 15 likes today", 'Your likes come back at midnight, Zambia time. Premium gives you unlimited likes.'],
     super_limit: ["You've used your 5 super likes today", 'They come back at midnight, Zambia time.'],
@@ -693,7 +700,7 @@ function UpsellSheet({kind, onClose}){
     h('h3',{style:{fontSize:22,margin:'6px 0'}},t[0]),
     h('p',{style:{color:'#5E5A73',lineHeight:1.5,margin:0}},t[1]),
     h('ul',{className:'perks'}, ['Unlimited likes','See who liked you','Undo your last swipe','5 super likes a day','3 boosts a day (shown first for 30 minutes)'].map(x=>h('li',{key:x},x))),
-    h('button',{className:'btn',disabled:true,style:{opacity:.6}},'Premium is coming soon'),
+    payOn ? h('button',{className:'btn',onClick:onGet},'Get Premium') : h('button',{className:'btn',disabled:true,style:{opacity:.6}},'Premium is coming soon'),
     h('button',{className:'btn ghost',style:{marginTop:10},onClick:onClose},'Close'));
 }
 
@@ -924,7 +931,7 @@ function TipsSheet({onClose}){
     h('button',{className:'btn',style:{marginTop:12},onClick:onClose},'Close'));
 }
 
-function YouTab({data, go, openBlocked, openTips, openLegal}){
+function YouTab({data, go, openBlocked, openTips, openLegal, prem, payInfo, openPremium}){
   const [canInstall,setCanInstall]=useState(!!installEvt && !isStandalone());
   useEffect(()=>{ const f=()=>setCanInstall(!!installEvt && !isStandalone()); window.addEventListener('sakura-install',f); return ()=>window.removeEventListener('sakura-install',f); },[]);
   async function install(){ if(!installEvt) return; installEvt.prompt(); try{ await installEvt.userChoice; }catch(e){} installEvt=null; setCanInstall(false); }
@@ -937,6 +944,8 @@ function YouTab({data, go, openBlocked, openTips, openLegal}){
     h('div',{className:'you-row'}, 'Looking for: '+(p.looking_for||'Not set')),
     missing ? h('div',{className:'you-row'}, 'Photos: '+(1+photoCount)+' of 5. Add '+(4-photoCount)+' more in Edit profile so people can see more of you.') : null,
     canInstall ? h('button',{className:'btn',style:{marginBottom:10},onClick:install},'Install Sakura on your phone') : (!isStandalone() ? h('div',{className:'you-row'},'To install Sakura: open your browser menu and choose Install app or Add to Home screen (on iPhone: Share, then Add to Home Screen).') : null),
+    prem ? h('div',{className:'you-row'}, h('b',null,'Premium'), h('div',{className:'meta'}, prem.has_premium ? 'Active until '+new Date(prem.premium_until).toLocaleDateString([], {dateStyle:'medium'}) : (prem.locks_on ? 'You are on the free plan' : 'All premium tools are unlocked for testing'))) : null,
+    payInfo && payInfo.available ? h('button',{className:'btn',style:{marginBottom:10},onClick:openPremium},prem && prem.has_premium ? 'Add more Premium time' : 'Get Premium') : null,
     h('button',{className:'btn',style:{position:'relative'},onClick:()=>go('editProfile',{...data,focus:missing})}, 'Edit profile', missing ? h('i',{className:'badge dot',style:{top:8,right:10}}) : null),
     h('button',{className:'btn ghost',style:{marginTop:10},onClick:openBlocked},'Blocked users'),
     h('button',{className:'btn ghost',style:{marginTop:10},onClick:openTips},'Safety tips'),
@@ -966,6 +975,94 @@ function FilterSheet({filters, onApply, onClose}){
     h('button',{className:'btn ghost',style:{marginTop:10},onClick:onClose},'Cancel'));
 }
 
+const PAY_ERRORS = {
+  PAYMENTS_OFF:'Payments are closed right now.', INVALID_PHONE:'That phone number does not look right. Use a Zambian mobile number like 0961234567.',
+  INVALID_NETWORK:'Choose MTN or Airtel.', INVALID_PLAN:'That plan is not available.',
+  TOO_MANY_PENDING:'You already have payments waiting. Finish or cancel them first.', TOO_MANY_ATTEMPTS:'Too many attempts today. Please try again tomorrow.'
+};
+function payError(msg){ const k=Object.keys(PAY_ERRORS).find(x=>(msg||'').includes(x)); return k ? PAY_ERRORS[k] : 'Something went wrong. Please try again.'; }
+
+function PremiumSheet({info, onClose, onPaid}){
+  const [step,setStep]=useState('plans'); const [plan,setPlan]=useState(null); const [net,setNet]=useState('MTN'); const [phone,setPhone]=useState('');
+  const [err,setErr]=useState(''); const [busy,setBusy]=useState(false); const [pay,setPay]=useState(null); const [st,setSt]=useState(null); const [hist,setHist]=useState([]);
+  const plans = (info && info.plans) || [];
+  const demo = info && info.provider==='demo';
+  useEffect(()=>{ sb.rpc('get_my_payments').then(({data})=>setHist(data||[])); },[step]);
+  useEffect(()=>{
+    if(step!=='wait' || !pay) return;
+    let stop=false;
+    const tick=async()=>{
+      const { data, error } = await sb.rpc('get_payment_status',{p_id:pay.id});
+      if(stop || error || !data) return;
+      setSt(data);
+      if(data.status==='paid'){ onPaid(data.premium); setStep('done'); }
+      else if(['failed','expired','cancelled'].includes(data.status)) setStep('failed');
+    };
+    tick(); const t=setInterval(tick,3000);
+    return ()=>{ stop=true; clearInterval(t); };
+  },[step,pay&&pay.id]);
+  const local = phone.replace(/[\s-]/g,'').replace(/^\+?260/,'0');
+  const hint = (/^0(96|76)/.test(local) && net==='AIRTEL') ? 'That looks like an MTN number. Check the network.' : (/^0(97|77)/.test(local) && net==='MTN') ? 'That looks like an Airtel number. Check the network.' : '';
+  async function proceed(){
+    setErr('');
+    if(!/^(\+?260|0)?[79][0-9]{8}$/.test(phone.replace(/[\s-]/g,''))){ setErr(PAY_ERRORS.INVALID_PHONE); return; }
+    setBusy(true);
+    const { data, error } = await sb.rpc('create_payment',{p_plan:plan.id,p_network:net,p_phone:phone});
+    if(error){ setBusy(false); setErr(payError(error.message)); return; }
+    setPay(data); setSt(null);
+    if(data.provider!=='demo'){
+      const r = await sb.functions.invoke('charge-payment',{body:{payment_id:data.id}});
+      if(r.error){
+        let m=''; try{ const j=await r.error.context.json(); m=j.error||''; }catch(e){}
+        setBusy(false); setErr(m||'We could not start the payment. Please try again.'); return;
+      }
+      if(r.data && r.data.redirect_url){ setSt({redirect_url:r.data.redirect_url}); try{ window.open(r.data.redirect_url,'_blank'); }catch(e){} }
+    }
+    setBusy(false); setStep('wait');
+  }
+  async function cancel(){ if(pay) await sb.rpc('cancel_payment',{p_id:pay.id}); setStep('plans'); }
+  const box = {width:'100%',textAlign:'center'};
+  let body;
+  if(!info || !info.available) body = h('div',{style:box}, h('p',{style:{color:'#5E5A73'}},'Payments are not open yet. Please check back soon.'));
+  else if(step==='plans') body = h('div',{style:box},
+    h('p',{style:{color:'#5E5A73',margin:'0 0 12px'}},'Choose a plan. Premium does not renew by itself.'),
+    plans.map(p=>h('div',{key:p.id,className:'plan'+(plan&&plan.id===p.id?' on':''),onClick:()=>setPlan(p)},
+      h('div',{style:{textAlign:'left'}},h('b',null,p.name),h('div',{className:'meta'},p.days+(p.days===1?' day':' days')+' of Premium')), h('span',{className:'price'},'K'+Number(p.price)))),
+    h('button',{className:'btn',disabled:!plan,onClick:()=>setStep('pay')},'Continue'),
+    hist.length ? h('div',{className:'pays'}, h('div',{className:'sec'},'Your payments'), hist.slice(0,5).map(x=>h('div',{key:x.id,className:'row-item'},
+      h('div',{className:'ri-info'},h('b',null,x.plan_name+' · K'+Number(x.amount)),h('div',{className:'meta'},fmtTime(x.created_at)+(x.failure_reason?' · '+x.failure_reason:''))),
+      h('span',{className:'tag'},x.status)))) : null);
+  else if(step==='pay') body = h('div',{style:box},
+    h('div',{className:'plan on',style:{cursor:'default'}}, h('div',{style:{textAlign:'left'}},h('b',null,plan.name),h('div',{className:'meta'},plan.days+(plan.days===1?' day':' days'))), h('span',{className:'price'},'K'+Number(plan.price))),
+    demo ? h('div',{className:'demobar'},'Demo mode: no real money is taken. The payment will succeed by itself in a few seconds.') : null,
+    h(Message,{type:'err'},err),
+    h('div',{className:'sec',style:{textAlign:'left'}},'Pay with'),
+    h('div',{className:'chips'}, ['MTN','AIRTEL'].map(n=>h('button',{key:n,type:'button',className:'chip'+(net===n?' on':''),onClick:()=>setNet(n)},n==='MTN'?'MTN Mobile Money':'Airtel Money'))),
+    h('div',{className:'sec',style:{textAlign:'left'}},'Your mobile money number'),
+    h('input',{type:'text',inputMode:'tel',value:phone,onChange:e=>setPhone(e.target.value),placeholder:'0961234567'}),
+    hint ? h('div',{className:'meta',style:{textAlign:'left',marginTop:6}},hint) : null,
+    h('p',{className:'meta',style:{margin:'12px 0'}},'After you tap Proceed, you will get a prompt on your phone. Enter your mobile money PIN to approve. We never see your PIN.'),
+    h('button',{className:'btn',disabled:busy,onClick:proceed},busy?'Please wait…':'Proceed to payment'),
+    h('button',{className:'btn ghost',style:{marginTop:10},disabled:busy,onClick:()=>setStep('plans')},'Back'));
+  else if(step==='wait') body = h('div',{style:box},
+    h('div',{className:'spin'}),
+    h('h3',{style:{fontSize:20}}, demo ? 'Demo payment in progress…' : 'Waiting for your approval'),
+    h('p',{style:{color:'#5E5A73',lineHeight:1.5}}, demo ? 'This takes a few seconds.' : 'Check your phone and enter your mobile money PIN to approve K'+Number(pay.amount)+'. Premium turns on by itself as soon as the payment is confirmed.'),
+    st && st.redirect_url ? h('div',null, h('p',{className:'meta'},'If you were not taken to the confirmation page:'), h('button',{className:'btn ghost',onClick:()=>{ try{ window.open(st.redirect_url,'_blank'); }catch(e){} }},'Open the confirmation page')) : null,
+    h('button',{className:'btn ghost',style:{marginTop:10},onClick:cancel},'Cancel payment'));
+  else if(step==='done') body = h('div',{style:box},
+    h('div',{style:{fontSize:48}},'🎉'), h('h3',{style:{fontSize:22}},'Payment received'),
+    h('p',{style:{color:'#5E5A73'}}, st && st.premium && st.premium.premium_until ? 'Premium is active until '+new Date(st.premium.premium_until).toLocaleDateString([], {dateStyle:'medium'})+'.' : 'Premium is now active.'),
+    h('button',{className:'btn',onClick:onClose},'Start using Premium'));
+  else body = h('div',{style:box},
+    h('div',{style:{fontSize:44}},'⚠️'), h('h3',{style:{fontSize:20}},'The payment did not go through'),
+    h('p',{style:{color:'#5E5A73'}}, (st && st.failure_reason) || (st && st.status==='expired' ? 'The payment expired before it was approved.' : 'It was cancelled or declined. You were not charged.')),
+    h('button',{className:'btn',onClick:()=>{ setErr(''); setStep('pay'); }},'Try again'));
+  return h('div',{className:'sheet top',style:{paddingTop:18}},
+    h('div',{className:'row',style:{display:'flex',alignItems:'center',justifyContent:'space-between'}}, h('h3',{style:{fontSize:22,margin:0}},'Sakura Premium'), step==='wait'?null:h('button',{className:'link',style:{fontSize:15},onClick:onClose},'Close')),
+    h('div',{style:{height:12}}), body);
+}
+
 function MainApp({data, go}){
   const me = data.user;
   const [tab,setTab]=useState(data.tab||'swipe');
@@ -982,6 +1079,8 @@ function MainApp({data, go}){
   const inboxRef=React.useRef(inbox); inboxRef.current=inbox;
   const tickRef=React.useRef(0); const [warns,setWarns]=useState([]);
   const [prem,setPrem]=useState(null); const [upsell,setUpsell]=useState(null); const [toast,setToast]=useState('');
+  const [payInfo,setPayInfo]=useState(null); const [showPremium,setShowPremium]=useState(false);
+  useEffect(()=>{ const load=()=>sb.rpc('get_payment_info').then(({data})=>{ if(data) setPayInfo(data); }); load(); const t=setInterval(load,30000); return ()=>clearInterval(t); },[]);
   useEffect(()=>{ if(!toast) return; const t=setTimeout(()=>setToast(''),3800); return ()=>clearTimeout(t); },[toast]);
   async function ackWarn(id){ setWarns(w=>w.filter(x=>x.id!==id)); await sb.rpc('acknowledge_warning',{p_id:id}); }
   useEffect(()=>{ document.body.classList.add('app-mode'); return ()=>document.body.classList.remove('app-mode'); },[]);
@@ -1086,7 +1185,7 @@ function MainApp({data, go}){
     pane('swipe', h(SwipeTab,{active:tab==='swipe',act,setSheet,hidden,filters,deckKey,prem,onUpsell:setUpsell,onUndo:doUndo,onBoost:doBoost})),
     pane('notif', h(NotifTab,{inbox,act,openChat,setSheet,active:tab==='notif',onUpsell:setUpsell})),
     pane('chat', h(ChatTab,{inbox,me,chatWith,setChatWith,setSheet,refresh,onSafety:(k,p)=>setSafety({mode:k,person:p}),showTip:!tipSeen,dismissTip}), !!chatWith),
-    pane('you', h(YouTab,{data,go,openBlocked:()=>setShowBlocked(true),openTips:()=>setShowTips(true),openLegal:()=>setShowLegal(true)})),
+    pane('you', h(YouTab,{data,go,prem,payInfo,openPremium:()=>setShowPremium(true),openBlocked:()=>setShowBlocked(true),openTips:()=>setShowTips(true),openLegal:()=>setShowLegal(true)})),
     h('div',{className:'nav'}, tabs.map(([id,icon,label,n,dot])=>h('button',{key:id,className:tab===id?'on':'',onClick:()=>setTab(id)},
       h('span',null,icon,n>0?h('i',{className:'badge'},n>99?'99+':n):(dot?h('i',{className:'badge dot'}):null)), label))),
     sheet ? h(ProfileSheet,{p:sheet,onClose:()=>setSheet(null),onSafety:(k)=>setSafety({mode:k,person:sheet})}) : null,
@@ -1101,7 +1200,8 @@ function MainApp({data, go}){
     showFilters ? h(FilterSheet,{filters,onApply:applyFilters,onClose:()=>setShowFilters(false)}) : null,
     showLegal ? h('div',{className:'sheet top'}, h('h3',{style:{margin:'20px 0 12px',fontSize:22}},'Terms and Privacy'), h(LegalBody), h('div',{style:{flex:1}}), h('button',{className:'btn',style:{marginTop:12},onClick:()=>setShowLegal(false)},'Close')) : null,
     safety ? h(SafetySheet,{mode:safety.mode,person:safety.person,me,onClose:()=>setSafety(null),onDone:safetyDone}) : null,
-    upsell ? h(UpsellSheet,{kind:upsell,onClose:()=>setUpsell(null)}) : null,
+    upsell ? h(UpsellSheet,{kind:upsell,onClose:()=>setUpsell(null),payOn:!!(payInfo&&payInfo.available),onGet:()=>{ setUpsell(null); setShowPremium(true); }}) : null,
+    showPremium ? h(PremiumSheet,{info:payInfo,onClose:()=>{ setShowPremium(false); refresh(); },onPaid:(p)=>{ if(p) setPrem(p); refresh(); }}) : null,
     toast ? h('div',{className:'toast',onClick:()=>setToast('')},toast) : null,
     warns.length ? h('div',{className:'sheet top center'},
       h('h3',{style:{fontSize:22}},'A message from Sakura'),
